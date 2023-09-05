@@ -54,6 +54,8 @@ export const Example = () => {
       columns={columns}
       data={data}
       enableRowActions
+      enableColumnFilters={false}
+      enableTopToolbar={false}
       renderRowActions={({ row, table }) => (
         <Box sx={{ display: 'flex', flexWrap: 'nowrap', gap: '8px' }}>
           <IconButton

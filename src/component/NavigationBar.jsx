@@ -37,7 +37,7 @@ const NavigationBar = () => {
     const isProfileActive = location.pathname === '/profil' ? true : false
 
     return (
-        <div className='fixed bottom-0 left-0 w-full'>
+        <div className='fixed bottom-0 left-0 w-full z-50'>
             <div className="bg-white flex justify-evenly shadow-lg max-w-[480px] mx-auto">
                 {/* <Stack spacing={1} sx={{ alignItems: 'center', py: 1, minWidth: '50px' }} onClick={onHome}>
                     <HomeIcon color={isHomeActive ? 'primary' : 'action'} />
