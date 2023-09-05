@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Typography } from "@mui/material"
+import { Alert, Box, Button, Modal, Typography } from "@mui/material"
 
 const style = {
     position: 'absolute',
@@ -11,7 +11,7 @@ const style = {
     p: 4,
 };
 
-const CoreModal = ({ open, handleClose, title, message, handleOk }) => {
+const CoreModal = ({ open, handleClose, title, message, handleOk, cancelText = 'Cancel', usingAlert }) => {
     return (
         <Modal
             open={open}
@@ -20,15 +20,17 @@ const CoreModal = ({ open, handleClose, title, message, handleOk }) => {
             aria-describedby="modal-modal-description"
         >
             <Box sx={style}>
-                <Typography id="modal-modal-title" variant="h6" component="h2">
+                {!!usingAlert && <Alert severity="error">{title}</Alert>}
+                {!!usingAlert === false && <Typography id="modal-modal-title" variant="h6" component="h2">
                     {title}
                 </Typography>
+                }
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                     {message}
                 </Typography>
                 <div className="flex flex-row justify-evenly">
-                    <Button sx={{ mt: 2, maxWidth: '100%' }} variant="contained" onClick={handleClose}>Cancel</Button>
-                    <Button sx={{ mt: 2, maxWidth: '100%' }} variant="contained" onClick={handleOk}>OK</Button>
+                    <Button sx={{ mt: 2, maxWidth: '100%' }} variant="contained" onClick={handleClose}>{cancelText}</Button>
+                    {handleOk ? <Button sx={{ mt: 2, maxWidth: '100%' }} variant="contained" onClick={handleOk}>OK</Button> : null}
                 </div>
             </Box>
         </Modal>

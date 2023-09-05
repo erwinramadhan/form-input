@@ -3,42 +3,74 @@ import { Box, Typography, Stack, TextField, Button, Alert, AlertTitle } from "@m
 import MainLayout from "../layout/MainLayout"
 import { useNavigate, use } from "react-router-dom"
 import BaseButton from "../component/BaseButton"
+import loginService from "../service/loginService"
+import { useEffect, useMemo, useState } from "react"
+import CoreModal from "../component/Modal"
 
 const Login = () => {
     const navigation = useNavigate()
+    const [identifier, setIdentifier] = useState('')
+    const [password, setPassword] = useState('')
+    const [openErrorLogin, setOpenErrorLogin] = useState(false)
 
-    const onLogin = () => {
-        navigation('/input')
+    const onLogin = async () => {
+        try {
+            const result = await loginService(identifier, password)
+            // localStorage.setItem('items', JSON.stringify(items));
+            const jwt = result.data.jwt
+            const user = result.data.user
+
+            localStorage.setItem('token', JSON.stringify(jwt));
+            localStorage.setItem('user', JSON.stringify(user));
+            navigation('/input')
+        } catch (error) {
+            setOpenErrorLogin(true)
+            console.log('error', error)
+        }
     }
 
+    const submitDisabled = useMemo(() => {
+        return (identifier === '' | password === '') ? true : false
+    }, [identifier, password])
+
+    useEffect(() => {
+        const jwt = localStorage.getItem('token');
+        if (!!jwt) {
+            navigation('/input')
+        }
+    }, [])
+
     return (
-        <MainLayout withoutNavBar>
-            <Stack spacing={6} sx={{ color: 'black', pt: 4 }}>
-                <Stack spacing={2}>
-                    <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold', color: '#575DFB', }}>
-                        Login
-                    </Typography>
-                    <Typography sx={{ width: '90%' }}>
-                        Login sekarang dan lakukan penginputan data atau melihat data yang sudah kamu inputkan ke database.
-                    </Typography>
-                </Stack>
-                <Stack spacing={2}>
-                    <Stack spacing={1}>
-                        <Typography sx={{ fontWeight: '600' }}>
-                            No Handphone
+        <>
+            <MainLayout withoutNavBar>
+                <Stack spacing={6} sx={{ color: 'black', pt: 4 }}>
+                    <Stack spacing={2}>
+                        <Typography variant="h4" component="h2" sx={{ fontWeight: 'bold', color: '#575DFB', }}>
+                            Login
                         </Typography>
-                        <TextField id="outlined-basic" label="" variant="outlined" size="small" />
-                    </Stack>
-                    <Stack spacing={1}>
-                        <Typography sx={{ fontWeight: '600' }}>
-                            Password
+                        <Typography sx={{ width: '90%' }}>
+                            Login sekarang dan lakukan penginputan data atau melihat data yang sudah kamu inputkan ke database.
                         </Typography>
-                        <TextField id="outlined-basic" label="" variant="outlined" type="password" size="small" />
                     </Stack>
+                    <Stack spacing={2}>
+                        <Stack spacing={1}>
+                            <Typography sx={{ fontWeight: '600' }}>
+                                No Handphone
+                            </Typography>
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" onChange={(e) => setIdentifier(e.target.value)} />
+                        </Stack>
+                        <Stack spacing={1}>
+                            <Typography sx={{ fontWeight: '600' }}>
+                                Password
+                            </Typography>
+                            <TextField id="outlined-basic" label="" variant="outlined" type="password" size="small" onChange={(e) => setPassword(e.target.value)} />
+                        </Stack>
+                    </Stack>
+                    <BaseButton text="Login" onClick={onLogin} disable={submitDisabled} />
                 </Stack>
-                <BaseButton text="Login" onClick={onLogin} />
-            </Stack>
-        </MainLayout>
+            </MainLayout>
+            <CoreModal open={openErrorLogin} handleClose={() => setOpenErrorLogin(false)} title="No Handphone atau Password yang anda masukan salah." message="Lalu pastikan anda terkoneksi internet" cancelText="Login Kembali" usingAlert />
+        </>
     )
 }
 
