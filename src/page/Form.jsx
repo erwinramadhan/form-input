@@ -50,7 +50,7 @@ const Form = () => {
         try {
             let idPhoto = null
 
-            if (filesResponden) {
+            if (filesResponden.length) {
                 try {
                     const resultImage = await uploadService(filesResponden)
                     console.log('resultImage', resultImage.data[0].id)
