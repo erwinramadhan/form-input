@@ -1,13 +1,13 @@
 import { Box, Button, Stack, TextField, MenuItem, Typography, CircularProgress } from "@mui/material"
-import React, { useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import CoreModal from "../component/Modal";
-import { useState } from "react";
 import MainLayout from "../layout/MainLayout";
 import BaseButton from "../component/BaseButton";
 import uploadService from "../service/uploadService";
 import formService from "../service/formService";
 import { useNavigate } from "react-router-dom";
+import Photo from "../assets/H_Totok_D.jpeg"
 
 const currencies = [
     {
@@ -113,11 +113,33 @@ const Form = () => {
         }
     }
 
+    useEffect(() => {
+        const tokenStorage = localStorage.getItem('token');
+        const tokenParsed = JSON.parse(tokenStorage);
+
+        if (!!tokenParsed === false) {
+            navigation('/')
+        }
+
+    }, [])
+
     return (
         <>
             <MainLayout>
                 <Stack spacing={8} sx={{ pb: 10 }}>
-                    <Box sx={{ color: 'black', textAlign: 'center', fontWeight: 'bold', fontSize: 20 }}>Tanggapan dan Penilaian Masyarakat Mengenai Pemilu Tahun 2024 dan Partai Politik di Kabupaten Sleman, D.I. Yogyakarta</Box>
+                    <Stack spacing={2}>
+                        {/* <div className="rounded-full flex justify-center items-center">
+                            <img src={Photo} className="rounded-full w-24 h-24" />
+                        </div> */}
+                        <Box sx={{ color: 'black', textAlign: 'center', fontWeight: 'medium', fontSize: 20 }}>
+                            Siap Memilih
+                            <p className="font-bold mb-2">H TOTOK DARYANYO , SE</p>
+                            <div className="rounded-full flex justify-center items-center mb-2">
+                                <img src={Photo} className="rounded-full w-24 h-24" />
+                            </div>
+                            <p className="text-yellow-500">DPR RI Dapil DIY</p>
+                        </Box>
+                    </Stack>
                     <Stack spacing={2}>
                         <Stack spacing={1}>
                             <Stack direction="row">
@@ -195,11 +217,11 @@ const Form = () => {
 
                 </Stack>
 
-                <CoreModal open={openModalSuccess} handleClose={() => { 
+                <CoreModal open={openModalSuccess} handleClose={() => {
                     setOpenModalSuccess(false)
                     navigation('/')
-                }} title={'Berhasil Menginput Data'} message={'Data yang Anda inputkan sudah berhasil dimasukan database'} 
-                cancelText="OK"
+                }} title={'Berhasil Menginput Data'} message={'Data yang Anda inputkan sudah berhasil dimasukan database'}
+                    cancelText="OK"
                 />
             </MainLayout>
             <div className="fixed bottom-20 mx-auto w-full">

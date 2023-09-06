@@ -2,6 +2,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import HomeIcon from '@mui/icons-material/Home'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import HistoryIcon from '@mui/icons-material/History';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { Stack } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CoreModal from './Modal';
@@ -14,6 +15,7 @@ const NavigationBar = () => {
     const navigation = useNavigate()
     const location = useLocation()
     const [open, setOpen] = useState(false)
+    const [openLogout, setOpenLogout] = useState(false)
 
     const onHome = () => {
         navigation('/home')
@@ -29,6 +31,11 @@ const NavigationBar = () => {
 
     const onHistory = () => {
         navigation('/riwayat')
+    }
+
+    const onLogout = () => {
+        localStorage.clear()
+        navigation('/')
     }
 
     const isHomeActive = location.pathname === '/home' ? true : false
@@ -55,7 +62,12 @@ const NavigationBar = () => {
                     <PersonIcon color={isProfileActive ? 'primary' : 'action'} />
                     <span className={isProfileActive ? classNameActive : classNameInActive}>Profil</span>
                 </Stack> */}
+                <Stack spacing={1} sx={{ alignItems: 'center', py: 1, minWidth: '50px' }} onClick={() => {setOpenLogout(true)}}>
+                    <LogoutIcon color={'action'} />
+                    <span className={classNameInActive}>Logout</span>
+                </Stack>
                 <CoreModal open={open} handleClose={() => setOpen(false)} title="Apakah anda yakin berpindah halaman?" message="Data tidak akan terkekam apabila belum di 'SUBMIT'." handleOk={onHistory} />
+                <CoreModal open={openLogout} handleClose={() => setOpenLogout(false)} title="Apakah anda yakin keluar dari aplikasi?" message="Anda akan kembali kehalaman login apabila melakukan logout." handleOk={onLogout} />
             </div>
         </div>
     )
