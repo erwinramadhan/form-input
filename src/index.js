@@ -7,9 +7,10 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './page/Login';
 import Form from './page/Form';
-import Home from './page/Home';
-import Profile from './page/Profile';
-import History from './page/History';
+// import Home from './page/Home';
+// import Profile from './page/Profile';
+// import History from './page/History';
+import NewHistory from './page/NewHistory';
 
 const theme = createTheme({
   typography: {
@@ -48,7 +49,7 @@ const router = createBrowserRouter([
   // },
   {
     path: "/riwayat",
-    element: <History />
+    element: <NewHistory />
   }
 ]);
 

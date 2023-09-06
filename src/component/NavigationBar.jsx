@@ -1,5 +1,5 @@
-import PersonIcon from '@mui/icons-material/Person'
-import HomeIcon from '@mui/icons-material/Home'
+// import PersonIcon from '@mui/icons-material/Person'
+// import HomeIcon from '@mui/icons-material/Home'
 import AssignmentIcon from '@mui/icons-material/Assignment'
 import HistoryIcon from '@mui/icons-material/History';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -17,13 +17,13 @@ const NavigationBar = () => {
     const [open, setOpen] = useState(false)
     const [openLogout, setOpenLogout] = useState(false)
 
-    const onHome = () => {
-        navigation('/home')
-    }
+    // const onHome = () => {
+    //     navigation('/home')
+    // }
 
-    const onProfile = () => {
-        navigation('/profil')
-    }
+    // const onProfile = () => {
+    //     navigation('/profil')
+    // }
 
     const onForm = () => {
         navigation('/input')
@@ -38,10 +38,10 @@ const NavigationBar = () => {
         navigation('/')
     }
 
-    const isHomeActive = location.pathname === '/home' ? true : false
+    // const isHomeActive = location.pathname === '/home' ? true : false
     const isHistoryActive = location.pathname === '/riwayat' ? true : false
     const isFormActive = location.pathname === '/input' ? true : false
-    const isProfileActive = location.pathname === '/profil' ? true : false
+    // const isProfileActive = location.pathname === '/profil' ? true : false
 
     return (
         <div className='fixed bottom-0 left-0 w-full z-50'>
