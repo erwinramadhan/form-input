@@ -1,7 +1,12 @@
 import axiosInstance from "./axiosInstance";
 
 const uploadService = async (imageFile) => {
-    axiosInstance.defaults.headers.common['Authorization'] = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjkzOTQwNDY4LCJleHAiOjE2OTY1MzI0Njh9.xR9NqH8eW1LpXtzrv991pXchN3WRb3mf5DZprQHAH0I";
+    const unParsedToken = localStorage.getItem('token')
+    const token = JSON.parse(unParsedToken)
+
+    console.log('unParsedToken', unParsedToken)
+    console.log('token', token)
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
     const formData = new FormData()
     formData.append('files', imageFile[0])

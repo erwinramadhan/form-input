@@ -46,10 +46,10 @@ const router = createBrowserRouter([
   //   path: "/profil",
   //   element: <Profile />
   // },
-  // {
-  //   path: "/riwayat",
-  //   element: <History />
-  // }
+  {
+    path: "/riwayat",
+    element: <History />
+  }
 ]);
 
 

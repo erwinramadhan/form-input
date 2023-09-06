@@ -98,7 +98,7 @@ const Form = () => {
                         usia: age,
                         photo: idPhoto,
                         keterangan: keterangan,
-                        surveyor_username: surveyor_username
+                        surveyor_username: parsedItem.username
                     }
                 }
 
