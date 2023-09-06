@@ -47,10 +47,10 @@ const NavigationBar = () => {
                     <AssignmentIcon color={isFormActive ? 'primary' : 'action'} />
                     <span className={isFormActive ? classNameActive : classNameInActive}>Form</span>
                 </Stack>
-                <Stack spacing={1} sx={{ alignItems: 'center', py: 1, minWidth: '50px' }} onClick={() => setOpen(true)}>
+                {/* <Stack spacing={1} sx={{ alignItems: 'center', py: 1, minWidth: '50px' }} onClick={() => setOpen(true)}>
                     <HistoryIcon color={isHistoryActive ? 'primary' : 'action'} />
                     <span className={isHistoryActive ? classNameActive : classNameInActive}>Riwayat</span>
-                </Stack>
+                </Stack> */}
                 {/* <Stack spacing={1} sx={{ alignItems: 'center', py: 1, minWidth: '50px' }} onClick={onProfile} >
                     <PersonIcon color={isProfileActive ? 'primary' : 'action'} />
                     <span className={isProfileActive ? classNameActive : classNameInActive}>Profil</span>

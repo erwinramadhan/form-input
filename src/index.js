@@ -38,18 +38,18 @@ const router = createBrowserRouter([
     path: '/input',
     element: <Form />
   },
-  {
-    path: "/home",
-    element: <Home />
-  },
-  {
-    path: "/profil",
-    element: <Profile />
-  },
-  {
-    path: "/riwayat",
-    element: <History />
-  }
+  // {
+  //   path: "/home",
+  //   element: <Home />
+  // },
+  // {
+  //   path: "/profil",
+  //   element: <Profile />
+  // },
+  // {
+  //   path: "/riwayat",
+  //   element: <History />
+  // }
 ]);
 
 
