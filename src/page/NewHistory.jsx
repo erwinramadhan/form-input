@@ -16,6 +16,7 @@ import MyModal from '../component/ModalTW'
 import LoadingAbsolute from '../component/LoadingAbsolute'
 import { Stack, TextField } from '@mui/material'
 import { baseURLServer } from '../service/axiosInstance'
+import { formDetailService } from '../service/formService'
 
 
 const defaultData = []
@@ -88,6 +89,8 @@ const NewHistory = () => {
     const [isOpenFailedDeleteDialog, setIsOpenFailedDeleteDialog] = useState(false)
     const [isOpenDetailDialog, setIsOpenDetailDialog] = useState(false)
     const [selectedDataAction, setSelectedDataAction] = useState(null)
+    const [detailData, setDetailData] = useState(null)
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false)
 
     // const [pagination, setPagination] = useState({
     //     pageIndex: 0,
@@ -118,6 +121,25 @@ const NewHistory = () => {
         }
     }
 
+    const fetchDetail = async (id, completionSuccess, completionFailed) => {
+        setIsLoadingDetail(true)
+        try {
+            const result = await formDetailService(id)
+
+            const detailData = result.data.data
+            const newDetailData = {
+                ...detailData.attributes,
+                id: detailData.id
+            }
+            setDetailData(newDetailData)
+            completionSuccess()
+            setIsLoadingDetail(false)
+        } catch (error) {
+            completionFailed(error)
+            setIsLoadingDetail(false)
+        }
+    }
+
     const negativeActionDeleteDialog = () => {
         setIsOpenDeleteDialog(false)
     }
@@ -141,9 +163,16 @@ const NewHistory = () => {
     }
 
     const onClickDetail = (id) => {
-        const selectedData = data.find(el => el.id === id)
-        setSelectedDataAction(selectedData)
+        setIsLoadingDetail(true)
+        fetchDetail(id, completionSuccessFetchDetail, completionFailedFetchDetail)
+    }
+
+    const completionSuccessFetchDetail = () => {
         setIsOpenDetailDialog(true)
+    }
+
+    const completionFailedFetchDetail = (error) => {
+        console.log('error fetch detail', error)
     }
 
     const detailCustomSubTitle = useMemo(() => {
@@ -151,57 +180,56 @@ const NewHistory = () => {
             <div className='flex flex-col mt-2 gap-3'>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Nama</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.nama}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.nama} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Jenis Kelamin</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.gender}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.gender} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Whatsapp</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.whatsapp}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.whatsapp} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kabupaten</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kabupaten}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kabupaten} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kecamatan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kecamatan}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kecamatan} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kelurahan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kelurahan}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kelurahan} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Dusun</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.dusun}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.dusun} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">RT/RW</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.rt_rw}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.rt_rw} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Umur</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.usia}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.usia} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Photo</p>
-                    <img src={baseURLServer + selectedDataAction?.photo?.data?.attributes?.url}/>
+                    <img src={baseURLServer + detailData?.photo?.data?.attributes?.url} />
                     {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/> */}
                 </Stack>
-                {console.log("PHOTO", selectedDataAction?.photo)}
             </div>
         )
-    }, [selectedDataAction])
+    }, [detailData])
 
     useEffect(() => {
         fetchInit()
@@ -329,7 +357,7 @@ const NewHistory = () => {
                 positiveText="Tutup"
                 size='large'
             />
-            <LoadingAbsolute loading={false} />
+            <LoadingAbsolute loading={isLoadingDetail} />
         </MainLayout>
     )
 }
