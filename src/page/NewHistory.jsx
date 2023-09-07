@@ -16,7 +16,7 @@ import MyModal from '../component/ModalTW'
 import LoadingAbsolute from '../component/LoadingAbsolute'
 import { Stack, TextField } from '@mui/material'
 import { baseURLServer } from '../service/axiosInstance'
-import { formDetailService } from '../service/formService'
+import { deleteFormService, formDetailService } from '../service/formService'
 
 
 const defaultData = []
@@ -91,6 +91,7 @@ const NewHistory = () => {
     const [selectedDataAction, setSelectedDataAction] = useState(null)
     const [detailData, setDetailData] = useState(null)
     const [isLoadingDetail, setIsLoadingDetail] = useState(false)
+    const [isLoadingDeleteDetail, setIsLoadingDeleteDetail] = useState(false)
 
     // const [pagination, setPagination] = useState({
     //     pageIndex: 0,
@@ -140,16 +141,22 @@ const NewHistory = () => {
         }
     }
 
+    const deleteDetail = async (id, completionSuccess, completionFailed) => {
+        try {
+            const result = await deleteFormService(id)
+
+            completionSuccess()
+        } catch (error) {
+            completionFailed(error)
+        }
+    }
+
     const negativeActionDeleteDialog = () => {
         setIsOpenDeleteDialog(false)
     }
 
     const positiveActionDeleteDialog = () => {
-        /// DO DELETE BY HTTP REQ
-        // setIsOpen(false)
-        setIsOpenDeleteDialog(false)
-        // setIsOpenSuccessDeleteDialog(true)
-        setIsOpenFailedDeleteDialog(true)
+        deleteDetail(selectedDataAction.id, completionSuccessDeleteDetail, completionFailedDeleteDetail)
     }
 
     const positiveActionDeleteSuccessDialog = () => {
@@ -173,6 +180,19 @@ const NewHistory = () => {
 
     const completionFailedFetchDetail = (error) => {
         console.log('error fetch detail', error)
+    }
+
+    const completionSuccessDeleteDetail = () => {
+        setIsOpenDeleteDialog(false)
+        setIsLoadingDeleteDetail(false)
+        setIsOpenSuccessDeleteDialog(true)
+        fetchInit()
+    }
+
+    const completionFailedDeleteDetail = (error) => {
+        setIsOpenDeleteDialog(false)
+        setIsLoadingDeleteDetail(false)
+        setIsOpenFailedDeleteDialog(true)
     }
 
     const detailCustomSubTitle = useMemo(() => {
@@ -267,7 +287,7 @@ const NewHistory = () => {
                                             <td key={cell.id} className='border p-1'>
                                                 <div className='flex gap-4 h-full'>
                                                     <ContentPasteSearchIcon className='cursor-pointer' onClick={() => onClickDetail(row.original.id)} />
-                                                    <EditIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
+                                                    <EditIcon className='cursor-pointer' onClick={() => {}} />
                                                     <DeleteIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
                                                 </div>
                                             </td>
