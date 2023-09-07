@@ -65,7 +65,7 @@ export const Example = () => {
         accessorKey: 'photo',
         header: 'Foto'
       }
-      
+
     ],
     [],
     //end
@@ -113,7 +113,7 @@ export const Example = () => {
   }, [])
 
   if (loading) {
-    return <div>LOADING</div>
+    return <LoadingAbsolute loading={loading} />
   } else {
     return (
       <MaterialReactTable
@@ -130,9 +130,9 @@ export const Example = () => {
             // showFirstButton: true,
             // showLastButton: true,
             page: 1,
-            onPageChange: (e) => {console.log('test', e)},
+            onPageChange: (e) => { console.log('test', e) },
           }
-        } 
+        }
       // renderRowActions={({ row, table }) => (
       //   <Box sx={{ display: 'flex', flexWrap: 'nowrap', gap: '8px' }}>
       //     <IconButton

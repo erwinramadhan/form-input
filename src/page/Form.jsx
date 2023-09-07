@@ -1,4 +1,4 @@
-import { Box, Stack, TextField, MenuItem, CircularProgress } from "@mui/material"
+import { Box, Stack, TextField, MenuItem } from "@mui/material"
 import React, { useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import CoreModal from "../component/Modal";
@@ -8,6 +8,7 @@ import uploadService from "../service/uploadService";
 import formService from "../service/formService";
 import { useNavigate } from "react-router-dom";
 import Photo from "../assets/H_Totok_D.jpeg"
+import LoadingAbsolute from "../component/LoadingAbsolute";
 
 const currencies = [
     {
@@ -229,12 +230,7 @@ const Form = () => {
                     <BaseButton text="Submit" onClick={onSubmit} disable={name === null || name === ''} />
                 </div>
             </div>
-            {
-                loading &&
-                <div className="absolute top-0 left-0 w-screen h-screen z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                    <CircularProgress />
-                </div>
-            }
+            <LoadingAbsolute loading={loading} />
 
         </>
     )

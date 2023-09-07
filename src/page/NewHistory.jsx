@@ -4,7 +4,7 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import MainLayout from '../layout/MainLayout'
 
 import './index.css'
@@ -12,6 +12,10 @@ import historyService from '../service/historyService'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import EditIcon from '@mui/icons-material/Edit';
+import MyModal from '../component/ModalTW'
+import LoadingAbsolute from '../component/LoadingAbsolute'
+import { Stack, TextField } from '@mui/material'
+import { baseURLServer } from '../service/axiosInstance'
 
 
 const defaultData = []
@@ -19,6 +23,10 @@ const defaultData = []
 const columnHelper = createColumnHelper()
 
 const columns = [
+    columnHelper.accessor('no', {
+        cell: info => info.getValue(),
+        header: <span>No</span>,
+    }),
     columnHelper.accessor('id', {
         cell: info => info.getValue(),
         header: <span>ID</span>,
@@ -75,6 +83,12 @@ const columns = [
 
 const NewHistory = () => {
     const [data, setData] = useState(() => [...defaultData])
+    const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false)
+    const [isOpenSuccessDeleteDialog, setIsOpenSuccessDeleteDialog] = useState(false)
+    const [isOpenFailedDeleteDialog, setIsOpenFailedDeleteDialog] = useState(false)
+    const [isOpenDetailDialog, setIsOpenDetailDialog] = useState(false)
+    const [selectedDataAction, setSelectedDataAction] = useState(null)
+
     // const [pagination, setPagination] = useState({
     //     pageIndex: 0,
     //     pageSize: 25,
@@ -91,17 +105,103 @@ const NewHistory = () => {
             const result = await historyService()
             const data = result.data.data
 
-            const dataTable = data.map(el => {
+            const dataTable = data.map((el, index) => {
                 return {
                     ...el.attributes,
-                    id: el.id
+                    id: el.id,
+                    no: data.length - index
                 }
             })
-            setData(dataTable)
+            setData(dataTable.sort((a, b) => b.id - a.id))
         } catch (error) {
             console.log('error', error)
         }
     }
+
+    const negativeActionDeleteDialog = () => {
+        setIsOpenDeleteDialog(false)
+    }
+
+    const positiveActionDeleteDialog = () => {
+        /// DO DELETE BY HTTP REQ
+        // setIsOpen(false)
+        setIsOpenDeleteDialog(false)
+        // setIsOpenSuccessDeleteDialog(true)
+        setIsOpenFailedDeleteDialog(true)
+    }
+
+    const positiveActionDeleteSuccessDialog = () => {
+        setIsOpenSuccessDeleteDialog(false)
+    }
+
+    const onClickDelete = (id) => {
+        const selectedData = data.find(el => el.id === id)
+        setSelectedDataAction(selectedData)
+        setIsOpenDeleteDialog(true)
+    }
+
+    const onClickDetail = (id) => {
+        const selectedData = data.find(el => el.id === id)
+        setSelectedDataAction(selectedData)
+        setIsOpenDetailDialog(true)
+    }
+
+    const detailCustomSubTitle = useMemo(() => {
+        return (
+            <div className='flex flex-col mt-2 gap-3'>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Nama</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.nama}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Jenis Kelamin</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.gender}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Whatsapp</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.whatsapp}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kabupaten</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kabupaten}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kecamatan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kecamatan}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kelurahan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.kelurahan}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Dusun</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.dusun}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">RT/RW</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.rt_rw}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Umur</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.usia}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Keterangan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Keterangan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Photo</p>
+                    <img src={baseURLServer + selectedDataAction?.photo?.data?.attributes?.url}/>
+                    {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/> */}
+                </Stack>
+                {console.log("PHOTO", selectedDataAction?.photo)}
+            </div>
+        )
+    }, [selectedDataAction])
 
     useEffect(() => {
         fetchInit()
@@ -138,9 +238,9 @@ const NewHistory = () => {
                                         return (
                                             <td key={cell.id} className='border p-1'>
                                                 <div className='flex gap-4 h-full'>
-                                                    <ContentPasteSearchIcon className='cursor-pointer' />
-                                                    <EditIcon className='cursor-pointer' />
-                                                    <DeleteIcon className='cursor-pointer' />
+                                                    <ContentPasteSearchIcon className='cursor-pointer' onClick={() => onClickDetail(row.original.id)} />
+                                                    <EditIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
+                                                    <DeleteIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
                                                 </div>
                                             </td>
                                         )
@@ -194,6 +294,42 @@ const NewHistory = () => {
                     </strong>
                 </span>
             </div>
+            <MyModal
+                isOpen={isOpenDeleteDialog}
+                positiveAction={positiveActionDeleteDialog}
+                negativeAction={negativeActionDeleteDialog}
+                onClose={() => setIsOpenDeleteDialog(false)}
+                title={["Hapus Data dengan Nama: ", <span className="text-blue-400 font-bold">{selectedDataAction?.nama ?? ""}</span>]}
+                subTitle="Apakah Anda yakin ingin menghapus data tersebut? Data yang sudah terhapus tidak akan bisa kembali."
+                positiveText="Hapus"
+                negativeText="Batal"
+            />
+            <MyModal
+                isOpen={isOpenSuccessDeleteDialog}
+                onClose={() => setIsOpenSuccessDeleteDialog(false)}
+                positiveAction={positiveActionDeleteSuccessDialog}
+                title="Berhasil Menghapus Data"
+                subTitle={["Data dengan Nama: ", <span className="text-blue-400 font-bold">{selectedDataAction?.nama ?? ""}</span>, " telah berhasil dihapus dari database."]}
+                positiveText="Ok"
+            />
+            <MyModal
+                isOpen={isOpenFailedDeleteDialog}
+                onClose={() => setIsOpenFailedDeleteDialog(false)}
+                positiveAction={() => setIsOpenFailedDeleteDialog(false)}
+                title="Gagal Menghapus Data"
+                subTitle={["Data dengan Nama: ", <span className="text-blue-400 font-bold">{selectedDataAction?.nama ?? ""}</span>, " gagal dihapus."]}
+                positiveText="Ok"
+            />
+            <MyModal
+                isOpen={isOpenDetailDialog}
+                onClose={() => setIsOpenDetailDialog(false)}
+                positiveAction={() => setIsOpenDetailDialog(false)}
+                title="Detail Data"
+                customSubtitle={detailCustomSubTitle}
+                positiveText="Tutup"
+                size='large'
+            />
+            <LoadingAbsolute loading={false} />
         </MainLayout>
     )
 }
