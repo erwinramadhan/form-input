@@ -212,6 +212,12 @@ const NewHistory = () => {
         setIsOpenSuccessDeleteDialog(false)
     }
 
+    const negativeActionEditDialog = () => {
+        setFilesResponden([])
+        setEditDetailData({})
+        setIsOpenEditDialog(false)
+    }
+
     const positiveActionEditDialog = () => {
         editDetail(selectedDataAction.id, completionSuccessEdit, completionFailedEdit)
     }
@@ -528,8 +534,8 @@ const NewHistory = () => {
             />
             <MyModal
                 isOpen={isOpenEditDialog}
-                onClose={() => setIsOpenEditDialog(false)}
-                negativeAction={() => setIsOpenEditDialog(false)}
+                onClose={negativeActionEditDialog}
+                negativeAction={negativeActionEditDialog}
                 positiveAction={positiveActionEditDialog}
                 title={`Detail Data ${editDetailData?.nama}`}
                 customSubtitle={detailEditCustomSubTitle}
