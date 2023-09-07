@@ -14,14 +14,27 @@ import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import EditIcon from '@mui/icons-material/Edit';
 import MyModal from '../component/ModalTW'
 import LoadingAbsolute from '../component/LoadingAbsolute'
-import { Stack, TextField } from '@mui/material'
+import { MenuItem, Stack, TextField } from '@mui/material'
 import { baseURLServer } from '../service/axiosInstance'
-import { deleteFormService, formDetailService } from '../service/formService'
+import { deleteFormService, editFormService, formDetailService } from '../service/formService'
+import { Previews } from './Form'
+import uploadService from '../service/uploadService'
 
 
 const defaultData = []
 
 const columnHelper = createColumnHelper()
+
+const currencies = [
+    {
+        value: 'Laki-Laki',
+        label: 'Laki-Laki',
+    },
+    {
+        value: 'Perempuan',
+        label: 'Perempuan',
+    },
+];
 
 const columns = [
     columnHelper.accessor('no', {
@@ -88,10 +101,16 @@ const NewHistory = () => {
     const [isOpenSuccessDeleteDialog, setIsOpenSuccessDeleteDialog] = useState(false)
     const [isOpenFailedDeleteDialog, setIsOpenFailedDeleteDialog] = useState(false)
     const [isOpenDetailDialog, setIsOpenDetailDialog] = useState(false)
+    const [isOpenEditDialog, setIsOpenEditDialog] = useState(false)
     const [selectedDataAction, setSelectedDataAction] = useState(null)
     const [detailData, setDetailData] = useState(null)
     const [isLoadingDetail, setIsLoadingDetail] = useState(false)
     const [isLoadingDeleteDetail, setIsLoadingDeleteDetail] = useState(false)
+
+    const [editDetailData, setEditDetailData] = useState({})
+    const [editDetailSuccess, setEditDetailSuccess] = useState(false)
+
+    const [filesResponden, setFilesResponden] = useState([]);
 
     // const [pagination, setPagination] = useState({
     //     pageIndex: 0,
@@ -151,6 +170,36 @@ const NewHistory = () => {
         }
     }
 
+    const editDetail = async (id, completionSuccess, completionFailed) => {
+        try {
+            const data = {
+                data: {
+                    ...editDetailData
+                }
+            }
+
+            if (filesResponden.length) {
+                const resultImage = await uploadService(filesResponden)
+                const newData = {
+                    data: {
+                        ...data.data,
+                        photo: resultImage.data[0].id
+                    }
+                }
+
+                const result = await editFormService(id, newData)
+                completionSuccess()
+                return
+            }
+
+            const result = await editFormService(id, data)
+            completionSuccess()
+        } catch (error) {
+            completionFailed(error)
+        }
+
+    }
+
     const negativeActionDeleteDialog = () => {
         setIsOpenDeleteDialog(false)
     }
@@ -163,6 +212,10 @@ const NewHistory = () => {
         setIsOpenSuccessDeleteDialog(false)
     }
 
+    const positiveActionEditDialog = () => {
+        editDetail(selectedDataAction.id, completionSuccessEdit, completionFailedEdit)
+    }
+
     const onClickDelete = (id) => {
         const selectedData = data.find(el => el.id === id)
         setSelectedDataAction(selectedData)
@@ -172,6 +225,37 @@ const NewHistory = () => {
     const onClickDetail = (id) => {
         setIsLoadingDetail(true)
         fetchDetail(id, completionSuccessFetchDetail, completionFailedFetchDetail)
+    }
+
+    const onClickEdit = (id) => {
+        const selectedData = data.find(el => el.id === id)
+        setSelectedDataAction(selectedData)
+        setIsLoadingDetail(true)
+        fetchDetail(id, completionSuccessFetchDetailEdit, completionFailedFetchDetailEdit)
+    }
+
+    const completionSuccessFetchDetailEdit = () => {
+        setIsOpenEditDialog(true)
+    }
+
+    const completionFailedFetchDetailEdit = (error) => {
+        console.log('error fetch detail', error)
+    }
+
+    const completionSuccessEdit = () => {
+        setEditDetailSuccess(true)
+        setIsOpenEditDialog(false)
+        setFilesResponden([])
+        setEditDetailData({})
+        fetchInit()
+    }
+
+    const completionFailedEdit = (error) => {
+        console.log('error', error)
+        setIsOpenEditDialog(false)
+        setFilesResponden([])
+        setEditDetailData({})
+        fetchInit()
     }
 
     const completionSuccessFetchDetail = () => {
@@ -239,17 +323,82 @@ const NewHistory = () => {
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
                 </Stack>
                 <Stack spacing={1}>
-                    <p className="text-black text-sm font-medium">Keterangan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
-                </Stack>
-                <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Photo</p>
                     <img src={baseURLServer + detailData?.photo?.data?.attributes?.url} />
-                    {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={selectedDataAction?.keterangan}/> */}
                 </Stack>
             </div>
         )
     }, [detailData])
+
+    const detailEditCustomSubTitle = useMemo(() => {
+        return (
+            <div className='flex flex-col mt-2 gap-3'>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Nama</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.nama ?? detailData?.nama} onChange={(e) => setEditDetailData(prev => { return { ...prev, nama: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Jenis Kelamin</p>
+                    <TextField
+                        id="gender"
+                        select
+                        size="small"
+                        sx={{ backgroundColor: 'white' }}
+                        onChange={(e) => setEditDetailData(prev => { return { ...prev, gender: e.target.value } })}
+                        value={editDetailData?.gender ?? detailData?.gender}
+                    >
+                        {currencies.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Whatsapp</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.whatsapp ?? detailData?.whatsapp} onChange={(e) => setEditDetailData(prev => { return { ...prev, whatsapp: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kabupaten</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kabupaten ?? detailData?.kabupaten} onChange={(e) => setEditDetailData(prev => { return { ...prev, kabupaten: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kecamatan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kecamatan ?? detailData?.kecamatan} onChange={(e) => setEditDetailData(prev => { return { ...prev, kecamatan: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Kelurahan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kelurahan ?? detailData?.kelurahan} onChange={(e) => setEditDetailData(prev => { return { ...prev, kelurahan: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Dusun</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.dusun ?? detailData?.dusun} onChange={(e) => setEditDetailData(prev => { return { ...prev, dusun: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">RT/RW</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.rt_rw ?? detailData?.rt_rw} onChange={(e) => setEditDetailData(prev => { return { ...prev, rt_rw: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Umur</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.usia ?? detailData?.usia} onChange={(e) => setEditDetailData(prev => { return { ...prev, usia: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Keterangan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.keterangan ?? detailData?.keterangan} onChange={(e) => setEditDetailData(prev => { return { ...prev, keterangan: e.target.value } })} />
+                </Stack>
+                {/* <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Photo</p>
+                    <img src={baseURLServer + detailData?.photo?.data?.attributes?.url} />
+                </Stack> */}
+                <Stack spacing={1}>
+                    <Stack direction="row">
+                        <span className="text-black text-sm font-medium">Foto Responden</span>
+                    </Stack>
+                    <Previews name="Responden" files={filesResponden} setFiles={setFilesResponden} isEdit imgUrl={baseURLServer + detailData?.photo?.data?.attributes?.url} />
+                </Stack>
+            </div>
+        )
+    }, [detailData, editDetailData, filesResponden])
 
     useEffect(() => {
         fetchInit()
@@ -287,7 +436,7 @@ const NewHistory = () => {
                                             <td key={cell.id} className='border p-1'>
                                                 <div className='flex gap-4 h-full'>
                                                     <ContentPasteSearchIcon className='cursor-pointer' onClick={() => onClickDetail(row.original.id)} />
-                                                    <EditIcon className='cursor-pointer' onClick={() => {}} />
+                                                    <EditIcon className='cursor-pointer' onClick={() => onClickEdit(row.original.id)} />
                                                     <DeleteIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
                                                 </div>
                                             </td>
@@ -377,7 +526,18 @@ const NewHistory = () => {
                 positiveText="Tutup"
                 size='large'
             />
-            <LoadingAbsolute loading={isLoadingDetail} />
+            <MyModal
+                isOpen={isOpenEditDialog}
+                onClose={() => setIsOpenEditDialog(false)}
+                negativeAction={() => setIsOpenEditDialog(false)}
+                positiveAction={positiveActionEditDialog}
+                title={`Detail Data ${editDetailData?.nama}`}
+                customSubtitle={detailEditCustomSubTitle}
+                negativeText="Batal"
+                positiveText="Edit"
+                size='large'
+            />
+            <LoadingAbsolute loading={isLoadingDetail || isLoadingDeleteDetail} />
         </MainLayout>
     )
 }

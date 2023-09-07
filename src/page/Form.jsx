@@ -240,7 +240,10 @@ export default Form
 
 
 
-function Previews({ name, files, setFiles }) {
+export function Previews({ name, files, setFiles, isEdit, imgUrl }) {
+    console.log('files', files)
+    const shouldBeUsingImgURL = files.length === 0 && imgUrl && isEdit
+
     const { getRootProps, getInputProps } = useDropzone({
         accept: {
             'image/*': []
@@ -253,18 +256,29 @@ function Previews({ name, files, setFiles }) {
         }
     });
 
-    const thumbs = files.map(file => (
-        <div style={thumb} key={file.name} className="border rounded-md">
+    const thumbs = shouldBeUsingImgURL
+        ? <div style={thumb} className="border rounded-md">
             <div style={thumbInner}>
                 <img
-                    src={file.preview}
+                    src={imgUrl}
                     style={img}
                     // Revoke data uri after image is loaded
-                    onLoad={() => { URL.revokeObjectURL(file.preview) }}
+                    // onLoad={() => { URL.revokeObjectURL(file.preview) }}
                 />
             </div>
         </div>
-    ));
+        : files.map(file => (
+            <div style={thumb} key={file.name} className="border rounded-md">
+                <div style={thumbInner}>
+                    <img
+                        src={file.preview}
+                        style={img}
+                        // Revoke data uri after image is loaded
+                        onLoad={() => { URL.revokeObjectURL(file.preview) }}
+                    />
+                </div>
+            </div>
+        ));
 
     useEffect(() => {
         // Make sure to revoke the data uris to avoid memory leaks, will run on unmount
@@ -273,7 +287,7 @@ function Previews({ name, files, setFiles }) {
 
     return (
         <section className="container">
-            {thumbs.length > 0 ?
+            {files.length > 0 || (isEdit && imgUrl) ?
                 <aside style={thumbsContainer}>
                     {thumbs}
 

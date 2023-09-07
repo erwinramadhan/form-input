@@ -36,4 +36,15 @@ export const deleteFormService = async (id) => {
     return result
 }
 
+export const editFormService =  async (id, data) => {
+    const unParsedToken = localStorage.getItem('token')
+    const token = JSON.parse(unParsedToken)
+
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    const result = await axiosInstance.put(`/surveys/${id}`, data)
+
+    return result
+}
+
 export default formService
