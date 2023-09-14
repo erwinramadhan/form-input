@@ -26,6 +26,7 @@ const Form = () => {
 
     const [name, setName] = useState(null)
     const [age, setAge] = useState(null)
+    const [nik, setNik] = useState(null)
     const [gender, setGender] = useState(null)
     const [whatsapp, setWhatsapp] = useState(null)
     const [kecamatan, setKecamatan] = useState(null)
@@ -67,6 +68,7 @@ const Form = () => {
                             dusun: dusun,
                             rt_rw: rt_rw,
                             usia: age,
+                            nik, nik,
                             photo: resultImage.data[0].id,
                             keterangan: keterangan,
                             surveyor_username: parsedItem.username
@@ -97,6 +99,7 @@ const Form = () => {
                         dusun: dusun,
                         rt_rw: rt_rw,
                         usia: age,
+                        nik: nik,
                         photo: idPhoto,
                         keterangan: keterangan,
                         surveyor_username: parsedItem.username
@@ -151,6 +154,10 @@ const Form = () => {
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Umur</p>
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setAge(e.target.value)} />
+                        </Stack>
+                        <Stack spacing={1}>
+                            <p className="text-black text-sm font-medium">NIK</p>
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setNik(e.target.value)} />
                         </Stack>
                         <Stack spacing={1}>
                             <Stack direction="row">

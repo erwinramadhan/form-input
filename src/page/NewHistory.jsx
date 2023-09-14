@@ -81,6 +81,10 @@ const columns = [
         header: 'Umur',
         cell: info => info.getValue(),
     }),
+    columnHelper.accessor('nik', {
+        header: 'NIK',
+        cell: info => info.getValue()
+    }),
     columnHelper.accessor('keterangan', {
         header: 'Keterangan',
         cell: info => info.getValue(),
@@ -325,6 +329,10 @@ const NewHistory = () => {
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.usia} />
                 </Stack>
                 <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">NIK</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.nik} />
+                </Stack>
+                <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
                 </Stack>
@@ -387,6 +395,10 @@ const NewHistory = () => {
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Umur</p>
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.usia ?? detailData?.usia} onChange={(e) => setEditDetailData(prev => { return { ...prev, usia: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">NIK</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.nik ?? detailData?.nik} onChange={(e) => setEditDetailData(prev => { return { ...prev, nik: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
