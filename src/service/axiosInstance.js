@@ -1,9 +1,9 @@
 import axios from "axios";
 
-export const baseURLServer = 'http://103.175.219.0:1337'
+export const baseURLServer = 'https://api.rajna.space'
 
 const axiosInstance = axios.create({
-    baseURL: 'http://103.175.219.0:1337/api',
+    baseURL: 'https://api.rajna.space/api',
 });
 
 export default axiosInstance
