@@ -9,6 +9,7 @@ import formService from "../service/formService";
 import { useNavigate } from "react-router-dom";
 import Photo from "../assets/H_Totok_D.jpeg"
 import LoadingAbsolute from "../component/LoadingAbsolute";
+import SelectKabupaten from "../component/SelectKabupaten";
 
 const currencies = [
     {
@@ -212,7 +213,8 @@ const Form = () => {
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kabupaten</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKabupaten(e.target.value)} />
+                            {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKabupaten(e.target.value)} /> */}
+                            <SelectKabupaten onChange={(e) => setKabupaten(e.value)} />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kecamatan</p>
