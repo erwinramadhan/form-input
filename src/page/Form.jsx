@@ -36,6 +36,8 @@ const Form = () => {
     const [rt_rw, setRTRW] = useState(null)
     const [keterangan, setKeterangan] = useState(null)
 
+    const [location, setLocation] = useState(null);
+
     const [loading, setLoading] = useState(false)
 
 
@@ -71,7 +73,9 @@ const Form = () => {
                             nik, nik,
                             photo: resultImage.data[0].id,
                             keterangan: keterangan,
-                            surveyor_username: parsedItem.username
+                            surveyor_username: parsedItem.username,
+                            latitude: location?.latitude,
+                            longitude: location?.longitude
                         }
                     }
 
@@ -102,7 +106,9 @@ const Form = () => {
                         nik: nik,
                         photo: idPhoto,
                         keterangan: keterangan,
-                        surveyor_username: parsedItem.username
+                        surveyor_username: parsedItem.username,
+                        latitude: location?.latitude,
+                        longitude: location?.longitude
                     }
                 }
 
@@ -123,9 +129,30 @@ const Form = () => {
 
         if (!!tokenParsed === false) {
             navigation('/')
+            return
         }
 
+        setCurrentLocation()
     }, [])
+
+    const setCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error);
+        } else {
+            console.log("Geolocation not supported");
+        }
+    }
+
+    function success(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        setLocation({ latitude: `${latitude}`, longitude: `${longitude}` });
+        console.log(`Latitude: ${latitude}, Longitude: ${longitude} type: ${typeof latitude}`);
+    }
+
+    function error() {
+        console.log("Unable to retrieve your location");
+    }
 
     return (
         <>
@@ -269,8 +296,8 @@ export function Previews({ name, files, setFiles, isEdit, imgUrl }) {
                 <img
                     src={imgUrl}
                     style={img}
-                    // Revoke data uri after image is loaded
-                    // onLoad={() => { URL.revokeObjectURL(file.preview) }}
+                // Revoke data uri after image is loaded
+                // onLoad={() => { URL.revokeObjectURL(file.preview) }}
                 />
             </div>
         </div>
