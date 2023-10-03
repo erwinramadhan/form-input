@@ -11,6 +11,7 @@ import Form from './page/Form';
 // import Profile from './page/Profile';
 // import History from './page/History';
 import NewHistory from './page/NewHistory';
+import Register from './page/Register';
 
 const theme = createTheme({
   typography: {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />
   },
   {
     path: '/input',

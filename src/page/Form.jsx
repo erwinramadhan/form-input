@@ -165,7 +165,7 @@ const Form = () => {
                         </div> */}
                         <Box sx={{ color: 'black', textAlign: 'center', fontWeight: 'medium', fontSize: 20 }}>
                             Siap Memilih
-                            <p className="font-bold mb-2">H TOTOK DARYANYO , SE</p>
+                            <p className="font-bold mb-2">H TOTOK DARYANTO , SE</p>
                             <div className="rounded-full flex justify-center items-center mb-2">
                                 <img src={Photo} className="rounded-full w-24 h-24" />
                             </div>

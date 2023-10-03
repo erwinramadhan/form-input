@@ -54,7 +54,7 @@ const Login = () => {
                     <Stack spacing={2}>
                         <Stack spacing={1}>
                             <Typography sx={{ fontWeight: '600' }}>
-                                No Handphone
+                                Username
                             </Typography>
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" onChange={(e) => setIdentifier(e.target.value)} />
                         </Stack>
@@ -65,7 +65,15 @@ const Login = () => {
                             <TextField id="outlined-basic" label="" variant="outlined" type="password" size="small" onChange={(e) => setPassword(e.target.value)} />
                         </Stack>
                     </Stack>
-                    <BaseButton text="Login" onClick={onLogin} disable={submitDisabled} />
+                    <div className="flex flex-col gap-3">
+                        <BaseButton text="Login" onClick={onLogin} disable={submitDisabled} />
+                        <Typography sx={{ fontWeight: '600', textAlign: 'center' }}>
+                            Atau
+                        </Typography>
+                        <div className={`rounded-xl bg-white cursor-pointer text-sm text-black font-bold py-4 px-4 text-center`} onClick={() => { navigation('/register')}}>
+                            Daftar
+                        </div>
+                    </div>
                 </Stack>
             </MainLayout>
             <CoreModal open={openErrorLogin} handleClose={() => setOpenErrorLogin(false)} title="No Handphone atau Password yang anda masukan salah." message="Lalu pastikan anda terkoneksi internet" cancelText="Login Kembali" usingAlert />
