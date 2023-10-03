@@ -6,7 +6,7 @@ const formService = async (data) => {
 
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    const result = await axiosInstance.post('/surveys', data)
+    const result = await axiosInstance.post('/voters', data)
     
     return result
 }
@@ -19,8 +19,8 @@ export const formDetailService = async (id) => {
 
     const user = localStorage.getItem('user')
     const parsedItem = JSON.parse(user);
-    const userNameSurveyor = parsedItem.username
-    const result = await axiosInstance.get(`/surveys/${id}?filters[surveyor_username][$eq]=${userNameSurveyor}&populate=*`)
+    const userId = parsedItem.id
+    const result = await axiosInstance.get(`/voters/${id}?filters[users_permissions_user]=${userId}&populate=*`)
     
     return result
 }
@@ -31,7 +31,7 @@ export const deleteFormService = async (id) => {
 
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    const result = await axiosInstance.delete(`/surveys/${id}`)
+    const result = await axiosInstance.delete(`/voters/${id}`)
     
     return result
 }
@@ -42,7 +42,7 @@ export const editFormService =  async (id, data) => {
 
     axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-    const result = await axiosInstance.put(`/surveys/${id}`, data)
+    const result = await axiosInstance.put(`/voters/${id}`, data)
 
     return result
 }

@@ -10,8 +10,8 @@ const historyService = async () => {
 
     const user = localStorage.getItem('user')
     const parsedItem = JSON.parse(user);
-    const userNameSurveyor = parsedItem.username
-    const result = await axiosInstance.get(`/surveys?filters[surveyor_username][$eq]=${userNameSurveyor}&populate=*`)
+    const userId = parsedItem.id
+    const result = await axiosInstance.get(`/voters?filters[users_permissions_user]=${userId}&populate=*`)
     
     return result
 }

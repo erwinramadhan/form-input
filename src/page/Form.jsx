@@ -1,4 +1,5 @@
 import { Box, Stack, TextField, MenuItem } from "@mui/material"
+import Select from 'react-select'
 import React, { useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import CoreModal from "../component/Modal";
@@ -10,6 +11,54 @@ import { useNavigate } from "react-router-dom";
 import Photo from "../assets/H_Totok_D.jpeg"
 import LoadingAbsolute from "../component/LoadingAbsolute";
 import SelectKabupaten from "../component/SelectKabupaten";
+import { makeGetRegenciesRequest } from "../service/regenciesService"
+import { makeGetDistrictsRequest } from "../service/districtsService";
+
+const EDUCATION = {
+    SD: 'SD',
+    SMP: 'SMP',
+    SMA: 'SMA',
+    S1: 'S1',
+    S2: 'S2',
+    S3: 'S3'
+}
+
+const EDUCATION_LIST_SELECT = [
+    { value: EDUCATION.S1, label: EDUCATION.S1 },
+    { value: EDUCATION.S2, label: EDUCATION.S2 },
+    { value: EDUCATION.S3, label: EDUCATION.S3 },
+    { value: EDUCATION.SD, label: EDUCATION.SD },
+    { value: EDUCATION.SMP, label: EDUCATION.SMP },
+    { value: EDUCATION.SMA, label: EDUCATION.SMA }
+]
+
+const ISSUES = {
+    Korupsi: 'Korupsi',
+    Ekonomi: 'Ekonomi',
+    Sosial: 'Sosial',
+    EtnisDanAgama: 'Etnis dan Agama',
+    Lingkungan: 'Lingkungan',
+    KonflikInternasional: 'Konflik Internasional',
+    HakAsasiManusia: 'Hak Asasi Manusia',
+    KeamananNasional: 'Keamanan Nasional',
+    Kesehatan: 'Kesehatan',
+    Pengangguran: 'Pengangguran',
+    KesejahteraanSosial: 'Kesejahteraan Sosial'
+}
+
+const ISSUES_LIST_SELECT = [
+    { value: ISSUES.Ekonomi, label: ISSUES.Ekonomi },
+    { value: ISSUES.EtnisDanAgama, label: ISSUES.EtnisDanAgama },
+    { value: ISSUES.HakAsasiManusia, label: ISSUES.HakAsasiManusia },
+    { value: ISSUES.KeamananNasional, label: ISSUES.KeamananNasional },
+    { value: ISSUES.Kesehatan, label: ISSUES.Kesehatan },
+    { value: ISSUES.KesejahteraanSosial, label: ISSUES.KesejahteraanSosial },
+    { value: ISSUES.KonflikInternasional, label: ISSUES.KonflikInternasional },
+    { value: ISSUES.Korupsi, label: ISSUES.Korupsi },
+    { value: ISSUES.Lingkungan, label: ISSUES.Lingkungan },
+    { value: ISSUES.Pengangguran, label: ISSUES.Pengangguran },
+    { value: ISSUES.Sosial, label: ISSUES.Sosial },
+]
 
 const currencies = [
     {
@@ -35,7 +84,18 @@ const Form = () => {
     const [kabupaten, setKabupaten] = useState(null)
     const [kelurahan, setKelurahan] = useState(null)
     const [rt_rw, setRTRW] = useState(null)
+    const [rt, setRT] = useState(null)
+    const [rw, setRW] = useState(null)
+    const [issues, setIssues] = useState(null)
+    const [education, setEducation] = useState(null)
+    const [userId, setUserId] = useState(null)
     const [keterangan, setKeterangan] = useState(null)
+    const [isLoadingRegencies, setIsLoadingRegencies] = useState(false)
+    const [isLoadingDistricts, setIsLoadingDistricts] = useState(false)
+    const [regencies, setRegencies] = useState([])
+    const [districts, setDistricts] = useState([])
+    const [selectedRegency, setSelectedRegency] = useState()
+    const [selectedDistrict, setSelectedDistrict] = useState()
 
     const [location, setLocation] = useState(null);
 
@@ -48,6 +108,64 @@ const Form = () => {
 
     const navigation = useNavigate()
 
+    const toggleLoadingRegencies = () => setIsLoadingRegencies(prev => !prev)
+    const toggleLoadingDistricts = () => setIsLoadingDistricts(prev => !prev)
+
+    const getRegencies = async () => {
+        try {
+            toggleLoadingRegencies()
+            const result = await makeGetRegenciesRequest()
+            const tempRegencies = result.map((el) => ({
+                label: el.name,
+                value: el.id
+            }))
+            setRegencies(tempRegencies)
+            toggleLoadingRegencies()
+        } catch (err) {
+            toggleLoadingRegencies()
+        }
+    }
+
+    const getDistricts = async (id) => {
+        try {
+            toggleLoadingDistricts()
+            const result = await makeGetDistrictsRequest(id)
+            const tempDistricts = result.map((el) => ({
+                label: el.name,
+                value: el.id
+            }))
+            setDistricts(tempDistricts)
+            toggleLoadingDistricts()
+        } catch (err) {
+            toggleLoadingDistricts()
+        }
+    }
+
+    const onChangeSelectRegency = (newValue) => {
+        setSelectedDistrict(undefined)
+        setKecamatan(null)
+        setSelectedRegency(newValue)
+        getDistricts(newValue.value)
+        setKabupaten(newValue.label)
+    }
+
+    const onChangeSelectDistrict = (newValue) => {
+        setSelectedDistrict(newValue)
+        setKecamatan(newValue.label)
+    }
+
+    const onChangeSelectIssue = (newValue) => {
+        setIssues(newValue.value)
+    }
+
+    const onChangeSelectEducation = (newValue) => {
+        setEducation(newValue.value)
+    }
+
+    useEffect(() => {
+        getRegencies()
+    }, [])
+
     const onSubmit = async () => {
         setLoading(true)
         const surveyor_username = localStorage.getItem('user')
@@ -58,31 +176,29 @@ const Form = () => {
             if (filesResponden.length) {
                 try {
                     const resultImage = await uploadService(filesResponden)
-                    console.log('resultImage', resultImage.data[0].id)
 
                     const data = {
                         data: {
-                            nama: name,
-                            gender: gender,
-                            whatsapp: whatsapp,
-                            kabupaten: kabupaten,
-                            kecamatan: kecamatan,
-                            kelurahan: kelurahan,
-                            dusun: dusun,
-                            rt_rw: rt_rw,
-                            usia: age,
-                            nik, nik,
+                            name,
+                            gender,
+                            whatsapp,
+                            province: 'Daerah Istimewa Yogyakarta',
+                            regency: kabupaten,
+                            district: kecamatan,
+                            subdistrict: kelurahan,
+                            dusun,
+                            rt,
+                            rw,
+                            description: keterangan,
+                            issues,
+                            education,
+                            age,
                             photo: resultImage.data[0].id,
-                            keterangan: keterangan,
-                            surveyor_username: parsedItem.username,
                             latitude: location?.latitude,
-                            longitude: location?.longitude
+                            longitude: location?.longitude,
+                            users_permissions_user: parsedItem.id
                         }
                     }
-
-                    console.log("WKKW DATA", data)
-                    console.log("idPhoto", idPhoto)
-                    console.log('surveyor_username', surveyor_username)
 
                     const result = await formService(data)
                     setLoading(false)
@@ -95,21 +211,24 @@ const Form = () => {
             } else {
                 const data = {
                     data: {
-                        nama: name,
-                        gender: gender,
-                        whatsapp: whatsapp,
-                        kabupaten: kabupaten,
-                        kecamatan: kecamatan,
-                        kelurahan: kelurahan,
-                        dusun: dusun,
-                        rt_rw: rt_rw,
-                        usia: age,
-                        nik: nik,
+                        name,
+                        gender,
+                        whatsapp,
+                        province: 'Daerah Istimewa Yogyakarta',
+                        regency: kabupaten,
+                        district: kecamatan,
+                        subdistrict: kelurahan,
+                        dusun,
+                        rt,
+                        rw,
+                        description: keterangan,
+                        issues,
+                        education,
+                        age,
                         photo: idPhoto,
-                        keterangan: keterangan,
-                        surveyor_username: parsedItem.username,
                         latitude: location?.latitude,
-                        longitude: location?.longitude
+                        longitude: location?.longitude,
+                        users_permissions_user: parsedItem.id
                     }
                 }
 
@@ -183,10 +302,10 @@ const Form = () => {
                             <p className="text-black text-sm font-medium">Umur</p>
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setAge(e.target.value)} />
                         </Stack>
-                        <Stack spacing={1}>
+                        {/* <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">NIK</p>
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setNik(e.target.value)} />
-                        </Stack>
+                        </Stack> */}
                         <Stack spacing={1}>
                             <Stack direction="row">
                                 <span className="text-black text-sm font-medium">Jenis Kelamin</span>
@@ -206,6 +325,16 @@ const Form = () => {
                             </TextField>
                         </Stack>
                         <Stack spacing={1}>
+                            <p className="text-black text-sm font-medium">Pendidikan</p>
+                            <Select
+                                isSearchable
+                                name="isues"
+                                options={EDUCATION_LIST_SELECT ?? []}
+                                onChange={onChangeSelectEducation}
+                                className="text-black"
+                            />
+                        </Stack>
+                        <Stack spacing={1}>
                             <Stack direction="row">
                                 <span className="text-black text-sm font-medium">No Whatsapp</span>
                             </Stack>
@@ -214,11 +343,31 @@ const Form = () => {
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kabupaten</p>
                             {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKabupaten(e.target.value)} /> */}
-                            <SelectKabupaten onChange={(e) => setKabupaten(e.value)} />
+                            {/* <SelectKabupaten onChange={(e) => setKabupaten(e.value)} /> */}
+                            <Select
+                                isSearchable
+                                name="regencies"
+                                options={regencies ?? []}
+                                onChange={onChangeSelectRegency}
+                                isLoading={isLoadingRegencies}
+                                isDisabled={regencies.length === 0}
+                                value={selectedRegency}
+                                className="text-black"
+                            />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kecamatan</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKecamatan(e.target.value)} />
+                            {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKecamatan(e.target.value)} /> */}
+                            <Select
+                                isSearchable
+                                name="districts"
+                                options={districts ?? []}
+                                onChange={onChangeSelectDistrict}
+                                isLoading={isLoadingDistricts}
+                                isDisabled={districts.length === 0}
+                                value={selectedDistrict}
+                                className="text-black"
+                            />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kelurahan</p>
@@ -229,8 +378,22 @@ const Form = () => {
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setDusun(e.target.value)} />
                         </Stack>
                         <Stack spacing={1}>
-                            <p className="text-black text-sm font-medium">RT/RW</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setRTRW(e.target.value)} />
+                            <p className="text-black text-sm font-medium">RT</p>
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setRT(e.target.value)} />
+                        </Stack>
+                        <Stack spacing={1}>
+                            <p className="text-black text-sm font-medium">RW</p>
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setRW(e.target.value)} />
+                        </Stack>
+                        <Stack spacing={1}>
+                            <p className="text-black text-sm font-medium">Isu</p>
+                            <Select
+                                isSearchable
+                                name="isues"
+                                options={ISSUES_LIST_SELECT ?? []}
+                                onChange={onChangeSelectIssue}
+                                className="text-black"
+                            />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Keterangan</p>
