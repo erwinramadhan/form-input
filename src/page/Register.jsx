@@ -9,9 +9,14 @@ import getAllTeams from "../service/teamService"
 import postRegister from "../service/registerService"
 
 const DEFAULT_ROLE_ID_SURVEYOR = 3
+const MODAL_ERROR_TYPE = {
+    SECRET_CODE_DOESNT_MATCH: 'SECRET_CODE_DOESNT_MATCH',
+    FORM_NOT_COMPLETED_OR_SERVER_ERROR: 'FORM_NOT_COMPLETED_OR_SERVER_ERROR'
+}
 
 const Register = () => {
     const navigation = useNavigate()
+    const [modalErrorType, setModalErrorType] = useState(null)
     const [isOpenModalError, setIsOpenModalError] = useState(false)
     const [teamDatas, setTeamDatas] = useState([])
     const [selectedTeam, setSelectedTeam] = useState({
@@ -44,19 +49,22 @@ const Register = () => {
         }))
     }
 
-    const onButtonRegister = () => {
+    const onButtonRegister = async () => {
         if (validationSecretCode()) {
-            register()
-            return
+            await register()
+        } else {
+            appearingModalError(MODAL_ERROR_TYPE.SECRET_CODE_DOESNT_MATCH)
         }
-        appearingModalError()
+        
     }
 
-    const appearingModalError = () => {
+    const appearingModalError = (type) => {
+        setModalErrorType(type)
         setIsOpenModalError(true)
     }
 
     const onCloseModalError = () => {
+        setModalErrorType(null)
         setIsOpenModalError(false)
     }
 
@@ -87,9 +95,34 @@ const Register = () => {
             const data = await postRegister(body)
             navigation('/')
         } catch (err) {
-
+            appearingModalError(MODAL_ERROR_TYPE.FORM_NOT_COMPLETED_OR_SERVER_ERROR)
         }
     }
+
+    const modalAttribute = useMemo(() => {
+        let title = ''
+        let message = ''
+
+        switch (modalErrorType) {
+            case MODAL_ERROR_TYPE.FORM_NOT_COMPLETED_OR_SERVER_ERROR:
+                title = 'Mohon periksa semua form kemungkinan ada kesalahan dalam pengimputan form atau server kami sedang bermasalah'
+                message = 'Pastikan form yang Anda isi benar apa bila masih bermasalah hubungi Admin Kami.'
+                break
+            case MODAL_ERROR_TYPE.SECRET_CODE_DOESNT_MATCH:
+                title = 'Kode Rahasia Team yang anda masukkan tidak sesuai dengan Team yang Anda Pilih.'
+                message = 'Pastikan Kode Rahasia Anda Benar'
+            default:
+                title = ''
+                message = ''
+        }
+
+        const data = {
+            title,
+            message
+        }
+        return data
+
+    }, [modalErrorType])
 
     useEffect(() => {
         const jwt = localStorage.getItem('token');
@@ -165,7 +198,7 @@ const Register = () => {
                     <BaseButton text="Daftar" onClick={onButtonRegister} />
                 </Stack>
             </MainLayout>
-            <CoreModal open={isOpenModalError} handleClose={onCloseModalError} title="Kode Rahasia Team yang anda masukkan tidak sesuai dengan Team yang Anda Pilih." message="Pastikan Kode Rahasia Anda Benar" cancelText="Daftar Ulang" usingAlert />
+            <CoreModal open={isOpenModalError} handleClose={onCloseModalError} title={modalAttribute.title} message={modalAttribute.message} cancelText="Daftar Ulang" usingAlert />
         </>
     )
 }

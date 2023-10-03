@@ -1,9 +1,13 @@
 import axios from "axios";
 
 const postRegister = async (body) => {
-    const { data } = await axios.post('https://api.rajna.space/api/auth/local/register', body)
+    try {
+        const { data } = await axios.post('https://api.rajna.space/api/auth/local/register', body)
 
-    return data
+        return data
+    } catch (err) {
+        throw err
+    }
 }
 
 export default postRegister
