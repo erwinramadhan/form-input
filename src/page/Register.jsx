@@ -38,7 +38,7 @@ const Register = () => {
   const onChangeTextField = (e) => {
     setFormData((prev) => {
       if (e.target.name === "phoneNumber") {
-        const username = e.target.name
+        const username = e.target.value
         return {
           ...prev,
           [e.target.name]: e.target.value,
