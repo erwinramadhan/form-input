@@ -54,7 +54,7 @@ const Login = () => {
                     <Stack spacing={2}>
                         <Stack spacing={1}>
                             <Typography sx={{ fontWeight: '600' }}>
-                                Username
+                                No Handphone / Email
                             </Typography>
                             <TextField id="outlined-basic" label="" variant="outlined" size="small" onChange={(e) => setIdentifier(e.target.value)} />
                         </Stack>
