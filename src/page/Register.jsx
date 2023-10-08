@@ -21,7 +21,7 @@ const Register = () => {
   const [modalErrorType, setModalErrorType] = useState(null);
   const [isOpenModalError, setIsOpenModalError] = useState(false);
   const [teamDatas, setTeamDatas] = useState([]);
-  const [photos, setPhotos] = useState([])
+  const [photos, setPhotos] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState({
     id: 0,
     label: "",
@@ -63,9 +63,9 @@ const Register = () => {
     }));
   };
 
-  const onButtonRegister = async () => {
+  const onButtonRegister = () => {
     if (validationSecretCode()) {
-      await register();
+      register();
     } else {
       appearingModalError(MODAL_ERROR_TYPE.SECRET_CODE_DOESNT_MATCH);
     }
@@ -102,16 +102,15 @@ const Register = () => {
     try {
       let body = formData;
       let resultImage;
-      delete body.secretCode;
+      // delete body.secretCode;
 
       if (photos.length) {
-        resultImage = await uploadService(photos)
+        resultImage = await uploadService(photos);
         body = {
           ...body,
-          displayPicture: resultImage.data[0].id
-        }
+          displayPicture: resultImage.data[0].id,
+        };
       }
-      
 
       const data = await postRegister(body);
       navigation("/");
@@ -224,15 +223,9 @@ const Register = () => {
             </Stack>
             <Stack spacing={1}>
               <Stack direction="row">
-                <span className="text-black text-sm font-medium">
-                  Foto
-                </span>
+                <span className="text-black text-sm font-medium">Foto</span>
               </Stack>
-              <Previews
-                name=""
-                files={photos}
-                setFiles={setPhotos}
-              />
+              <Previews name="" files={photos} setFiles={setPhotos} />
             </Stack>
             <Stack spacing={1}>
               <Typography sx={{ fontWeight: "600" }}>Team</Typography>
