@@ -92,7 +92,7 @@ const Register = () => {
       }));
 
       setTeamDatas(mappedData);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const register = async () => {
@@ -235,6 +235,9 @@ const Register = () => {
             </Stack>
           </Stack>
           <BaseButton text="Daftar" onClick={onButtonRegister} />
+          <div className={`rounded-xl bg-white cursor-pointer text-sm text-black font-bold py-4 px-4 text-center`} onClick={() => { navigation('/') }}>
+            Kembali Ke Login
+          </div>
         </Stack>
       </MainLayout>
       <CoreModal
