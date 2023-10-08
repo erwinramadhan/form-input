@@ -7,6 +7,8 @@ import CoreModal from "../component/Modal";
 import Select from "react-select";
 import getAllTeams from "../service/teamService";
 import postRegister from "../service/registerService";
+import { Previews } from "./Form";
+import uploadService from "../service/uploadService";
 
 const DEFAULT_ROLE_ID_SURVEYOR = 3;
 const MODAL_ERROR_TYPE = {
@@ -19,6 +21,7 @@ const Register = () => {
   const [modalErrorType, setModalErrorType] = useState(null);
   const [isOpenModalError, setIsOpenModalError] = useState(false);
   const [teamDatas, setTeamDatas] = useState([]);
+  const [photos, setPhotos] = useState([])
   const [selectedTeam, setSelectedTeam] = useState({
     id: 0,
     label: "",
@@ -38,11 +41,11 @@ const Register = () => {
   const onChangeTextField = (e) => {
     setFormData((prev) => {
       if (e.target.name === "phoneNumber") {
-        const username = e.target.value
+        const username = e.target.value;
         return {
           ...prev,
           [e.target.name]: e.target.value,
-          username
+          username,
         };
       }
 
@@ -92,13 +95,23 @@ const Register = () => {
       }));
 
       setTeamDatas(mappedData);
-    } catch (err) { }
+    } catch (err) {}
   };
 
   const register = async () => {
     try {
       let body = formData;
+      let resultImage;
       delete body.secretCode;
+
+      if (photos.length) {
+        resultImage = await uploadService(photos)
+        body = {
+          ...body,
+          displayPicture: resultImage.data[0].id
+        }
+      }
+      
 
       const data = await postRegister(body);
       navigation("/");
@@ -210,6 +223,18 @@ const Register = () => {
               />
             </Stack>
             <Stack spacing={1}>
+              <Stack direction="row">
+                <span className="text-black text-sm font-medium">
+                  Foto
+                </span>
+              </Stack>
+              <Previews
+                name=""
+                files={photos}
+                setFiles={setPhotos}
+              />
+            </Stack>
+            <Stack spacing={1}>
               <Typography sx={{ fontWeight: "600" }}>Team</Typography>
               <Select
                 isSearchable
@@ -235,7 +260,12 @@ const Register = () => {
             </Stack>
           </Stack>
           <BaseButton text="Daftar" onClick={onButtonRegister} />
-          <div className={`rounded-xl bg-white cursor-pointer text-sm text-black font-bold py-4 px-4 text-center`} onClick={() => { navigation('/') }}>
+          <div
+            className={`rounded-xl bg-white cursor-pointer text-sm text-black font-bold py-4 px-4 text-center`}
+            onClick={() => {
+              navigation("/");
+            }}
+          >
             Kembali Ke Login
           </div>
         </Stack>

@@ -6,7 +6,12 @@ const uploadService = async (imageFile) => {
 
     console.log('unParsedToken', unParsedToken)
     console.log('token', token)
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    if (token === null) {
+        delete axiosInstance.defaults.headers.common
+    } else {
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
 
     const formData = new FormData()
     formData.append('files', imageFile[0])
