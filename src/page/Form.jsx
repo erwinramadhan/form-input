@@ -13,6 +13,9 @@ import LoadingAbsolute from "../component/LoadingAbsolute";
 import SelectKabupaten from "../component/SelectKabupaten";
 import { makeGetRegenciesRequest } from "../service/regenciesService"
 import { makeGetDistrictsRequest } from "../service/districtsService";
+import { createWhatsappUrl } from "../helper/createWhatsappUrl";
+import ModalCamera from "../component/ModalCamera";
+import dataUriToFile from "../helper/dataUriToFile";
 
 const EDUCATION = {
     SD: 'SD',
@@ -22,6 +25,8 @@ const EDUCATION = {
     S2: 'S2',
     S3: 'S3'
 }
+
+const TOTOK_DARYANTO_CENTER = "6282242022078"
 
 const EDUCATION_LIST_SELECT = [
     { value: EDUCATION.S1, label: EDUCATION.S1 },
@@ -96,6 +101,7 @@ const Form = () => {
     const [districts, setDistricts] = useState([])
     const [selectedRegency, setSelectedRegency] = useState()
     const [selectedDistrict, setSelectedDistrict] = useState()
+    const [isOpenModalCamera, setIsOpenModalCamera] = useState(false)
 
     const [location, setLocation] = useState(null);
 
@@ -103,7 +109,7 @@ const Form = () => {
 
 
     // const [filesKTP, setFilesKTP] = useState([]);
-    const [filesResponden, setFilesResponden] = useState([]);
+    const [filesResponden, setFilesResponden] = useState();
     // const [filesLokasi, setFilesLokasi] = useState([]);
 
     const navigation = useNavigate()
@@ -166,6 +172,39 @@ const Form = () => {
         getRegencies()
     }, [])
 
+    const openNewTabWhatsapp = () => {
+        const phoneCenter = TOTOK_DARYANTO_CENTER
+        const userobj = localStorage.getItem('user')
+        const parsedUserObj = JSON.parse(userobj);
+        
+        const messageVoterOnUrl = `Halo Bapak Totok Daryanto, saya ${name} dari RT. ${rt} RW. ${rw} Kelurahan ${kelurahan} Kecamatan ${kecamatan} Kabupaten ${kabupaten}. Siap mendukung Bapak Totok untuk menjadi DPR RI Yogyakarta. 
+        
+#TDSukses2024
+        `
+
+        const encodedVoterMessage = encodeURIComponent(messageVoterOnUrl)
+
+        const message = `Salam Sukses #TDSukses2024
+
+Halo ${name}, ini adalah pesan Whatsapp dari ${parsedUserObj.fullName}. Untuk mengkonfirmasi bahwa ${name} mendukung Bapak Totok Daryanto menjadi DPR RI, silahkan mengkonfirmasi dengan menghubungi ke nomor Resmi Totok Daryanto Center ${phoneCenter} dengan mengklik link berikut :
+
+https://wa.me/${phoneCenter}/?text=${encodedVoterMessage}
+        
+Mohon bantuannya dan mari ikut berperan aktif dengan mengikuti akun Sosial Media resmi Bapak Totok Daryanto :
+- Facebook : https://www.facebook.com/totokdaryantocenter/
+- Instagram : http://instagram.com/totok.daryanto/
+- Twitter : https://twitter.com/totokdaryanto
+        
+Terimakasih atas partisipasi ${name}.
+`
+
+        const encodedMessage = encodeURIComponent(message)
+
+        const encodedUrl = createWhatsappUrl(encodedMessage, whatsapp)
+
+        window.open(encodedUrl, '_blank');
+    }
+
     const onSubmit = async () => {
         setLoading(true)
         const surveyor_username = localStorage.getItem('user')
@@ -173,9 +212,12 @@ const Form = () => {
         try {
             let idPhoto = null
 
-            if (filesResponden.length) {
+            if (filesResponden) {
                 try {
-                    const resultImage = await uploadService(filesResponden)
+                    const timestamp = Date.now();
+                    const file = dataUriToFile(filesResponden, `survey_${name}_${age}_${timestamp}.png`);
+
+                    const resultImage = await uploadService([file])
 
                     const data = {
                         data: {
@@ -407,7 +449,9 @@ const Form = () => {
                             <Stack direction="row">
                                 <span className="text-black text-sm font-medium">Foto Responden</span>
                             </Stack>
-                            <Previews name="Responden" files={filesResponden} setFiles={setFilesResponden} />
+                            {filesResponden ? <img src={filesResponden} alt="Gambar yang diambil" /> : null}
+                            {/* <Previews name="Responden" files={filesResponden} setFiles={setFilesResponden} /> */}
+                            <BaseButton text="CAMERA!" onClick={() => setIsOpenModalCamera(true)}></BaseButton>
                         </Stack>
                         {/* <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Foto Lokasi</p>
@@ -420,8 +464,15 @@ const Form = () => {
                 <CoreModal open={openModalSuccess} handleClose={() => {
                     setOpenModalSuccess(false)
                     navigation('/')
+                    openNewTabWhatsapp()
                 }} title={'Berhasil Menginput Data'} message={'Data yang Anda inputkan sudah berhasil dimasukan database'}
                     cancelText="OK"
+                />
+                <ModalCamera
+                photo={filesResponden}
+                setPhoto={setFilesResponden}
+                    isOpen={isOpenModalCamera}
+                    onClose={() => setIsOpenModalCamera(false)}
                 />
             </MainLayout>
             <div className="fixed bottom-20 mx-auto w-full">
