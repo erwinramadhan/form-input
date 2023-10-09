@@ -28,7 +28,7 @@ const EDUCATION = {
 
 const TOTOK_DARYANTO_CENTER = "6282242022078"
 
-const EDUCATION_LIST_SELECT = [
+export const EDUCATION_LIST_SELECT = [
     { value: EDUCATION.S1, label: EDUCATION.S1 },
     { value: EDUCATION.S2, label: EDUCATION.S2 },
     { value: EDUCATION.S3, label: EDUCATION.S3 },
@@ -51,7 +51,7 @@ const ISSUES = {
     KesejahteraanSosial: 'Kesejahteraan Sosial'
 }
 
-const ISSUES_LIST_SELECT = [
+export const ISSUES_LIST_SELECT = [
     { value: ISSUES.Ekonomi, label: ISSUES.Ekonomi },
     { value: ISSUES.EtnisDanAgama, label: ISSUES.EtnisDanAgama },
     { value: ISSUES.HakAsasiManusia, label: ISSUES.HakAsasiManusia },
@@ -102,6 +102,20 @@ const Form = () => {
     const [selectedRegency, setSelectedRegency] = useState()
     const [selectedDistrict, setSelectedDistrict] = useState()
     const [isOpenModalCamera, setIsOpenModalCamera] = useState(false)
+
+    const [isValidPhoneNumber, setIsValidPhoneNumber] = useState(false);
+
+    const handleWhatsappChange = (e) => {
+        const sanitizedValue = e.target.value.replace(/[^0-9]/g, '');
+        setWhatsapp(sanitizedValue);
+
+        // Validasi panjang input (misalnya, 10 digit)
+        if (sanitizedValue.length >= 10) {
+        setIsValidPhoneNumber(true);
+        } else {
+        setIsValidPhoneNumber(false);
+        }
+    };
 
     const [location, setLocation] = useState(null);
 
@@ -342,7 +356,10 @@ Terimakasih atas partisipasi ${name}.
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Umur</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setAge(e.target.value)} />
+                            <TextField type="number" id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={age} onChange={(e) => {
+                                const sanitizedValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+                                setAge(sanitizedValue)}
+                             } />
                         </Stack>
                         {/* <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">NIK</p>
@@ -380,12 +397,10 @@ Terimakasih atas partisipasi ${name}.
                             <Stack direction="row">
                                 <span className="text-black text-sm font-medium">No Whatsapp</span>
                             </Stack>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setWhatsapp(e.target.value)} />
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={whatsapp} error={isValidPhoneNumber === false && whatsapp !== "" && whatsapp !== null} onChange={handleWhatsappChange} placeholder="082255781234" />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Kabupaten</p>
-                            {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setKabupaten(e.target.value)} /> */}
-                            {/* <SelectKabupaten onChange={(e) => setKabupaten(e.value)} /> */}
                             <Select
                                 isSearchable
                                 name="regencies"
@@ -421,11 +436,17 @@ Terimakasih atas partisipasi ${name}.
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">RT</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setRT(e.target.value)} />
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={rt} onChange={(e) => {
+                                const sanitizedValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+                                setRT(sanitizedValue)}
+                             } />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">RW</p>
-                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} onChange={(e) => setRW(e.target.value)} />
+                            <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={rw} onChange={(e) => 
+                                {const sanitizedValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+                                    setRW(sanitizedValue)}
+                                 } />
                         </Stack>
                         <Stack spacing={1}>
                             <p className="text-black text-sm font-medium">Isu</p>

@@ -16,9 +16,10 @@ import MyModal from '../component/ModalTW'
 import LoadingAbsolute from '../component/LoadingAbsolute'
 import { MenuItem, Stack, TextField } from '@mui/material'
 import { baseURLServer } from '../service/axiosInstance'
-import { deleteFormService, editFormService, formDetailService } from '../service/formService'
-import { Previews } from './Form'
-import uploadService from '../service/uploadService'
+import { EDUCATION_LIST_SELECT, Previews, ISSUES_LIST_SELECT } from './Form'
+import Select from 'react-select'
+
+import useDetailEditDeleteModal from './useDetailEditDeleteModal'
 
 
 const defaultData = []
@@ -45,7 +46,7 @@ const columns = [
         cell: info => info.getValue(),
         header: <span>ID</span>,
     }),
-    columnHelper.accessor('nama', {
+    columnHelper.accessor('name', {
         cell: info => info.getValue(),
         header: <span>Nama</span>,
     }),
@@ -57,15 +58,15 @@ const columns = [
         header: () => 'Whatsapp',
         cell: info => info.renderValue(),
     }),
-    columnHelper.accessor('kabupaten', {
+    columnHelper.accessor('regency', {
         header: () => <span>Kabupaten</span>,
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('kecamatan', {
+    columnHelper.accessor('district', {
         header: 'Kecamatan',
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('kelurahan', {
+    columnHelper.accessor('subdistrict', {
         header: 'Kelurahan',
         cell: info => info.getValue(),
     }),
@@ -73,19 +74,19 @@ const columns = [
         header: 'Dusun',
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('rt_rw', {
-        header: 'RT/RW',
+    columnHelper.accessor('rt', {
+        header: 'RT',
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('usia', {
+    columnHelper.accessor('rw', {
+        header: 'RW',
+        cell: info => info.getValue(),
+    }),
+    columnHelper.accessor('age', {
         header: 'Umur',
         cell: info => info.getValue(),
     }),
-    columnHelper.accessor('nik', {
-        header: 'NIK',
-        cell: info => info.getValue()
-    }),
-    columnHelper.accessor('keterangan', {
+    columnHelper.accessor('description', {
         header: 'Keterangan',
         cell: info => info.getValue(),
     }),
@@ -93,33 +94,39 @@ const columns = [
         header: 'Aksi',
         cell: info => info.getValue(),
     }),
-    // columnHelper.accessor('photo', {
-    //     header: 'Foto',
-    //     cell: info => info.getValue(),
-    // }),
 ]
 
 const NewHistory = () => {
     const [data, setData] = useState(() => [...defaultData])
-    const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false)
-    const [isOpenSuccessDeleteDialog, setIsOpenSuccessDeleteDialog] = useState(false)
-    const [isOpenFailedDeleteDialog, setIsOpenFailedDeleteDialog] = useState(false)
-    const [isOpenDetailDialog, setIsOpenDetailDialog] = useState(false)
-    const [isOpenEditDialog, setIsOpenEditDialog] = useState(false)
-    const [selectedDataAction, setSelectedDataAction] = useState(null)
-    const [detailData, setDetailData] = useState(null)
-    const [isLoadingDetail, setIsLoadingDetail] = useState(false)
-    const [isLoadingDeleteDetail, setIsLoadingDeleteDetail] = useState(false)
 
-    const [editDetailData, setEditDetailData] = useState({})
-    const [editDetailSuccess, setEditDetailSuccess] = useState(false)
-
-    const [filesResponden, setFilesResponden] = useState([]);
-
-    // const [pagination, setPagination] = useState({
-    //     pageIndex: 0,
-    //     pageSize: 25,
-    // })
+    const { 
+        editDetailData,
+        filesResponden,
+        detailData,
+        setEditDetailData,
+        isOpenFailedDeleteDialog,
+        setIsOpenDeleteDialog,
+        deleteDetail,
+        selectedDataAction,
+        setIsOpenSuccessDeleteDialog,
+        setFilesResponden,
+        setIsOpenEditDialog,
+        editDetail,
+        setSelectedDataAction,
+        setIsLoadingDetail,
+        fetchDetail,
+        setEditDetailSuccess,
+        setIsOpenDetailDialog,
+        setIsLoadingDeleteDetail,
+        setIsOpenFailedDeleteDialog,
+        isOpenDeleteDialog,
+        isOpenSuccessDeleteDialog,
+        isOpenDetailDialog,
+        isOpenEditDialog,
+        isLoadingDetail,
+        isLoadingDeleteDetail,
+        domicilyStateAndFunc
+    } = useDetailEditDeleteModal()
 
     const table = useReactTable({
         data,
@@ -143,65 +150,6 @@ const NewHistory = () => {
         } catch (error) {
             console.log('error', error)
         }
-    }
-
-    const fetchDetail = async (id, completionSuccess, completionFailed) => {
-        setIsLoadingDetail(true)
-        try {
-            const result = await formDetailService(id)
-
-            const detailData = result.data.data
-            const newDetailData = {
-                ...detailData.attributes,
-                id: detailData.id
-            }
-            setDetailData(newDetailData)
-            completionSuccess()
-            setIsLoadingDetail(false)
-        } catch (error) {
-            completionFailed(error)
-            setIsLoadingDetail(false)
-        }
-    }
-
-    const deleteDetail = async (id, completionSuccess, completionFailed) => {
-        try {
-            const result = await deleteFormService(id)
-
-            completionSuccess()
-        } catch (error) {
-            completionFailed(error)
-        }
-    }
-
-    const editDetail = async (id, completionSuccess, completionFailed) => {
-        try {
-            const data = {
-                data: {
-                    ...editDetailData
-                }
-            }
-
-            if (filesResponden.length) {
-                const resultImage = await uploadService(filesResponden)
-                const newData = {
-                    data: {
-                        ...data.data,
-                        photo: resultImage.data[0].id
-                    }
-                }
-
-                const result = await editFormService(id, newData)
-                completionSuccess()
-                return
-            }
-
-            const result = await editFormService(id, data)
-            completionSuccess()
-        } catch (error) {
-            completionFailed(error)
-        }
-
     }
 
     const negativeActionDeleteDialog = () => {
@@ -261,7 +209,6 @@ const NewHistory = () => {
     }
 
     const completionFailedEdit = (error) => {
-        console.log('error', error)
         setIsOpenEditDialog(false)
         setFilesResponden([])
         setEditDetailData({})
@@ -289,16 +236,56 @@ const NewHistory = () => {
         setIsOpenFailedDeleteDialog(true)
     }
 
+    const changeKabupaten = (kab) => {
+        setEditDetailData(prev => { return { ...prev, regency: kab } })
+    }
+
+    const changeKecamatan = (kec) => {
+        setEditDetailData(prev => { return { ...prev, district: kec } })
+    }
+
+    const onChangeSelectEducation = (newValue) => {
+        setEditDetailData((prev) => ({ ...prev ,education: newValue.value}))
+    }
+
+    const selectValueEducation = useMemo(() => {
+        if (editDetailData?.education) {
+            return { value: editDetailData?.education, label: editDetailData?.education }
+        } else {
+            return { value: detailData?.education, label: detailData?.education }
+        }
+    }, [detailData, editDetailData])
+
+    const onChangeSelectIssue = (newValue) => {
+        setEditDetailData((prev) => ({ ...prev, issues: newValue.value}))
+    }
+
+    const selectValueIssues = useMemo(() => {
+        if (editDetailData?.education) {
+            return { value: editDetailData?.issues, label: editDetailData?.issues }
+        } else {
+            return { value: detailData?.issues, label: detailData?.issues }
+        }
+    }, [detailData, editDetailData])
+
+    useEffect(() => {
+        fetchInit()
+    }, [])
+
     const detailCustomSubTitle = useMemo(() => {
         return (
             <div className='flex flex-col mt-2 gap-3'>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Nama</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.nama} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.name} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Jenis Kelamin</p>
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.gender} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">Pendidikan</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.education} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Whatsapp</p>
@@ -306,35 +293,39 @@ const NewHistory = () => {
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kabupaten</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kabupaten} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.regency} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kecamatan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kecamatan} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.district} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kelurahan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.kelurahan} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.subdistrict} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Dusun</p>
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.dusun} />
                 </Stack>
                 <Stack spacing={1}>
-                    <p className="text-black text-sm font-medium">RT/RW</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.rt_rw} />
+                    <p className="text-black text-sm font-medium">RT</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.rt} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">RW</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.rw} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Umur</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.usia} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.age} />
                 </Stack>
                 <Stack spacing={1}>
-                    <p className="text-black text-sm font-medium">NIK</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.nik} />
+                    <p className="text-black text-sm font-medium">Isu</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.issues} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.keterangan} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} disabled value={detailData?.description} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Photo</p>
@@ -349,7 +340,7 @@ const NewHistory = () => {
             <div className='flex flex-col mt-2 gap-3'>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Nama</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.nama ?? detailData?.nama} onChange={(e) => setEditDetailData(prev => { return { ...prev, nama: e.target.value } })} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.name ?? detailData?.name} onChange={(e) => setEditDetailData(prev => { return { ...prev, name: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Jenis Kelamin</p>
@@ -373,36 +364,78 @@ const NewHistory = () => {
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.whatsapp ?? detailData?.whatsapp} onChange={(e) => setEditDetailData(prev => { return { ...prev, whatsapp: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
+                <p className="text-black text-sm font-medium">Pendidikan</p>
+                <Select
+                                isSearchable
+                                name="isues"
+                                options={EDUCATION_LIST_SELECT ?? []}
+                                onChange={onChangeSelectEducation}
+                                className="text-black"
+                                value={selectValueEducation}
+                            />
+                </Stack>
+                <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kabupaten</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kabupaten ?? detailData?.kabupaten} onChange={(e) => setEditDetailData(prev => { return { ...prev, kabupaten: e.target.value } })} />
+                    <Select
+                        isSearchable
+                        name="regencies"
+                        options={domicilyStateAndFunc.regencies ?? []}
+                        onChange={(val) => domicilyStateAndFunc.onChangeSelectRegency(val, changeKabupaten, changeKecamatan)}
+                        isLoading={domicilyStateAndFunc.isLoadingRegencies}
+                        isDisabled={domicilyStateAndFunc.regencies.length === 0}
+                        value={domicilyStateAndFunc.selectedRegency}
+                        className="text-black"
+                    />
+                    {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.regency ?? detailData?.regency} onChange={(e) => setEditDetailData(prev => { return { ...prev, regency: e.target.value } })} /> */}
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kecamatan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kecamatan ?? detailData?.kecamatan} onChange={(e) => setEditDetailData(prev => { return { ...prev, kecamatan: e.target.value } })} />
+                    <Select
+                        isSearchable
+                        name="districts"
+                        options={domicilyStateAndFunc.districts ?? []}
+                        onChange={(val) => domicilyStateAndFunc.onChangeSelectDistrict(val, changeKecamatan)}
+                        isLoading={domicilyStateAndFunc.isLoadingDistricts}
+                        // isDisabled={domicilyStateAndFunc.districts.length === 0}
+                        value={domicilyStateAndFunc.selectedDistrict}
+                        className="text-black"
+                    />
+                    {/* <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.district ?? detailData?.district} onChange={(e) => setEditDetailData(prev => { return { ...prev, district: e.target.value } })} /> */}
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Kelurahan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.kelurahan ?? detailData?.kelurahan} onChange={(e) => setEditDetailData(prev => { return { ...prev, kelurahan: e.target.value } })} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.subdistrict ?? detailData?.subdistrict} onChange={(e) => setEditDetailData(prev => { return { ...prev, subdistrict: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Dusun</p>
                     <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.dusun ?? detailData?.dusun} onChange={(e) => setEditDetailData(prev => { return { ...prev, dusun: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
-                    <p className="text-black text-sm font-medium">RT/RW</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.rt_rw ?? detailData?.rt_rw} onChange={(e) => setEditDetailData(prev => { return { ...prev, rt_rw: e.target.value } })} />
+                    <p className="text-black text-sm font-medium">RT</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.rt ?? detailData?.rt} onChange={(e) => setEditDetailData(prev => { return { ...prev, rt: e.target.value } })} />
+                </Stack>
+                <Stack spacing={1}>
+                    <p className="text-black text-sm font-medium">RW</p>
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.rw ?? detailData?.rw} onChange={(e) => setEditDetailData(prev => { return { ...prev, rw: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Umur</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.usia ?? detailData?.usia} onChange={(e) => setEditDetailData(prev => { return { ...prev, usia: e.target.value } })} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.age ?? detailData?.age} onChange={(e) => setEditDetailData(prev => { return { ...prev, age: e.target.value } })} />
                 </Stack>
                 <Stack spacing={1}>
-                    <p className="text-black text-sm font-medium">NIK</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.nik ?? detailData?.nik} onChange={(e) => setEditDetailData(prev => { return { ...prev, nik: e.target.value } })} />
-                </Stack>
+                            <p className="text-black text-sm font-medium">Isu</p>
+                            <Select
+                                isSearchable
+                                name="isues"
+                                options={ISSUES_LIST_SELECT ?? []}
+                                onChange={onChangeSelectIssue}
+                                className="text-black"
+                                value={selectValueIssues}
+                            />
+                        </Stack>
                 <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Keterangan</p>
-                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.keterangan ?? detailData?.keterangan} onChange={(e) => setEditDetailData(prev => { return { ...prev, keterangan: e.target.value } })} />
+                    <TextField id="outlined-basic" label="" variant="outlined" size="small" sx={{ backgroundColor: 'white' }} value={editDetailData?.description ?? detailData?.description} onChange={(e) => setEditDetailData(prev => { return { ...prev, description: e.target.value } })} />
                 </Stack>
                 {/* <Stack spacing={1}>
                     <p className="text-black text-sm font-medium">Photo</p>
@@ -417,10 +450,6 @@ const NewHistory = () => {
             </div>
         )
     }, [detailData, editDetailData, filesResponden])
-
-    useEffect(() => {
-        fetchInit()
-    }, [])
 
     return (
         <MainLayout>
@@ -549,7 +578,7 @@ const NewHistory = () => {
                 onClose={negativeActionEditDialog}
                 negativeAction={negativeActionEditDialog}
                 positiveAction={positiveActionEditDialog}
-                title={`Detail Data ${editDetailData?.nama}`}
+                title={`Edit Detail Data ${editDetailData?.name}`}
                 customSubtitle={detailEditCustomSubTitle}
                 negativeText="Batal"
                 positiveText="Edit"
