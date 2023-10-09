@@ -14,6 +14,17 @@ const DEFAULT_ROLE_ID_SURVEYOR = 3;
 const MODAL_ERROR_TYPE = {
   SECRET_CODE_DOESNT_MATCH: "SECRET_CODE_DOESNT_MATCH",
   FORM_NOT_COMPLETED_OR_SERVER_ERROR: "FORM_NOT_COMPLETED_OR_SERVER_ERROR",
+  ALREADY_TAKEN: "ALREADY_TAKEN",
+  EMAIL_NOT_VALID: "EMAIL_NOT_VALID",
+  AT_LEAST_SIX_CHAR: "AT_LEAST_SIX_CHAR",
+  MUST_STRING: "MUST_STRING",
+};
+
+const ERROR_REGISTER_SERVICE_CASE = {
+  ALREADY_TAKEN: "Email or Username are already taken",
+  EMAIL_NOT_VALID: "email must be a valid email",
+  AT_LEAST_SIX_CHAR: "password must be at least 6 characters",
+  MUST_STRING: "password must be a `string` type, but the final value was: ",
 };
 
 const Register = () => {
@@ -64,14 +75,14 @@ const Register = () => {
   };
 
   const onButtonRegister = () => {
-    if (validationSecretCode()) {
+    const isValid = validationSecretCode();
+    if (isValid) {
       register();
-    } else {
-      appearingModalError(MODAL_ERROR_TYPE.SECRET_CODE_DOESNT_MATCH);
     }
   };
 
   const appearingModalError = (type) => {
+    console.log("type", type);
     setModalErrorType(type);
     setIsOpenModalError(true);
   };
@@ -82,7 +93,15 @@ const Register = () => {
   };
 
   const validationSecretCode = () => {
-    return formData.secretCode === selectedTeam.secretCode;
+    const result =
+      formData.secretCode === selectedTeam.secretCode &&
+      formData.secretCode !== "" &&
+      selectedTeam.secretCode !== "";
+
+    if (result === false) {
+      appearingModalError(MODAL_ERROR_TYPE.SECRET_CODE_DOESNT_MATCH);
+    }
+    return result;
   };
 
   const getTeams = async () => {
@@ -115,7 +134,31 @@ const Register = () => {
       const data = await postRegister(body);
       navigation("/");
     } catch (err) {
-      appearingModalError(MODAL_ERROR_TYPE.FORM_NOT_COMPLETED_OR_SERVER_ERROR);
+      const errorMessage = err.response.data.error.message;
+
+      const isAlreadyTaken =
+        errorMessage === ERROR_REGISTER_SERVICE_CASE.ALREADY_TAKEN;
+      const isEmailNotValid =
+        errorMessage === ERROR_REGISTER_SERVICE_CASE.EMAIL_NOT_VALID;
+      const isUnderSixChar =
+        errorMessage === ERROR_REGISTER_SERVICE_CASE.AT_LEAST_SIX_CHAR;
+      const notAString = errorMessage.includes(
+        ERROR_REGISTER_SERVICE_CASE.MUST_STRING
+      );
+
+      if (isAlreadyTaken) {
+        appearingModalError(MODAL_ERROR_TYPE.ALREADY_TAKEN);
+      } else if (isUnderSixChar) {
+        appearingModalError(MODAL_ERROR_TYPE.AT_LEAST_SIX_CHAR);
+      } else if (notAString) {
+        appearingModalError(MODAL_ERROR_TYPE.MUST_STRING);
+      } else if (isEmailNotValid) {
+        appearingModalError(MODAL_ERROR_TYPE.EMAIL_NOT_VALID);
+      } else {
+        appearingModalError(
+          MODAL_ERROR_TYPE.FORM_NOT_COMPLETED_OR_SERVER_ERROR
+        );
+      }
     }
   };
 
@@ -134,6 +177,27 @@ const Register = () => {
         title =
           "Kode Rahasia Team yang anda masukkan tidak sesuai dengan Team yang Anda Pilih.";
         message = "Pastikan Kode Rahasia Anda Benar";
+        break;
+      case MODAL_ERROR_TYPE.ALREADY_TAKEN:
+        title =
+          "Alamat Email atau No Whatsapp Anda sudah digunakan oleh orang lain.";
+        message =
+          "Silahkan gunakan Alamat Email atau No Whatsapp Anda yang lain.";
+        break;
+      case MODAL_ERROR_TYPE.EMAIL_NOT_VALID:
+        title = "Alamat Email yang anda masukkan tidak valid";
+        message = "Silahkan gunakan Alamat Email yang valid.";
+        break;
+      case MODAL_ERROR_TYPE.AT_LEAST_SIX_CHAR:
+        title = "Password yang anda masukkan terlalu pendek";
+        message =
+          "Setidaknya masukkan password dengan panjang minimal 6 karakter";
+        break;
+      case MODAL_ERROR_TYPE.MUST_STRING:
+        title = "Password yang anda masukkan terlalu pendek";
+        message =
+          "Setidaknya masukkan password dengan panjang minimal 6 karakter";
+        break;
       default:
         title = "";
         message = "";
@@ -263,14 +327,16 @@ const Register = () => {
           </div>
         </Stack>
       </MainLayout>
-      <CoreModal
-        open={isOpenModalError}
-        handleClose={onCloseModalError}
-        title={modalAttribute.title}
-        message={modalAttribute.message}
-        cancelText="Daftar Ulang"
-        usingAlert
-      />
+      {isOpenModalError && (
+        <CoreModal
+          open={isOpenModalError}
+          handleClose={onCloseModalError}
+          title={modalAttribute.title}
+          message={modalAttribute.message}
+          cancelText="Daftar Ulang"
+          usingAlert
+        />
+      )}
     </>
   );
 };
