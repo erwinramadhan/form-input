@@ -16,6 +16,7 @@ import { makeGetDistrictsRequest } from "../service/districtsService";
 import { createWhatsappUrl } from "../helper/createWhatsappUrl";
 import ModalCamera from "../component/ModalCamera";
 import dataUriToFile from "../helper/dataUriToFile";
+import convertNumberString from "../helper/convertNumber";
 
 const EDUCATION = {
     SD: 'SD',
@@ -26,7 +27,7 @@ const EDUCATION = {
     S3: 'S3'
 }
 
-const TOTOK_DARYANTO_CENTER = "6282242022078"
+const TOTOK_DARYANTO_CENTER = "62811234584"
 
 export const EDUCATION_LIST_SELECT = [
     { value: EDUCATION.S1, label: EDUCATION.S1 },
@@ -200,7 +201,7 @@ const Form = () => {
 
         const message = `Salam Sukses #TDSukses2024
 
-Halo ${name}, ini adalah pesan Whatsapp dari ${parsedUserObj.fullName}. Untuk mengkonfirmasi bahwa ${name} mendukung Bapak Totok Daryanto menjadi DPR RI, silahkan mengkonfirmasi dengan menghubungi ke nomor Resmi Totok Daryanto Center ${phoneCenter} dengan mengklik link berikut :
+Halo ${name}, ini adalah pesan Whatsapp dari ${parsedUserObj.fullName}. Untuk mengkonfirmasi bahwa ${name} mendukung Bapak Totok Daryanto menjadi DPR RI, silahkan mengkonfirmasi dengan menghubungi ke nomor Resmi Totok Daryanto Center +${phoneCenter} dengan mengklik link berikut :
 
 https://wa.me/${phoneCenter}/?text=${encodedVoterMessage}
         
@@ -214,7 +215,7 @@ Terimakasih atas partisipasi ${name}.
 
         const encodedMessage = encodeURIComponent(message)
 
-        const encodedUrl = createWhatsappUrl(encodedMessage, whatsapp)
+        const encodedUrl = createWhatsappUrl(encodedMessage, convertNumberString(whatsapp))
 
         window.open(encodedUrl, '_blank');
     }
@@ -237,7 +238,7 @@ Terimakasih atas partisipasi ${name}.
                         data: {
                             name,
                             gender,
-                            whatsapp,
+                            whatsapp: convertNumberString(whatsapp),
                             province: 'Daerah Istimewa Yogyakarta',
                             regency: kabupaten,
                             district: kecamatan,
@@ -269,7 +270,7 @@ Terimakasih atas partisipasi ${name}.
                     data: {
                         name,
                         gender,
-                        whatsapp,
+                        whatsapp: convertNumberString(whatsapp),
                         province: 'Daerah Istimewa Yogyakarta',
                         regency: kabupaten,
                         district: kecamatan,

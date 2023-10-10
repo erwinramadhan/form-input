@@ -483,7 +483,7 @@ const NewHistory = () => {
                                             <td key={cell.id} className='border p-1'>
                                                 <div className='flex gap-4 h-full'>
                                                     <ContentPasteSearchIcon className='cursor-pointer' onClick={() => onClickDetail(row.original.id)} />
-                                                    <EditIcon className='cursor-pointer' onClick={() => onClickEdit(row.original.id)} />
+                                                    {/* <EditIcon className='cursor-pointer' onClick={() => onClickEdit(row.original.id)} /> */}
                                                     <DeleteIcon className='cursor-pointer' onClick={() => onClickDelete(row.original.id)} />
                                                 </div>
                                             </td>
